@@ -1,0 +1,10 @@
+preserve element's attribute order
+search for form's subelements, similar to list's strategy
+no runtime dependency on LOX (?)
+user sessions
+history of Pages
+logging
+
+ensure pages are printable
+
+recognize html input field type (e.g. date, int, url, text)

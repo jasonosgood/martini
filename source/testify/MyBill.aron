@@ -1,0 +1,12 @@
+# ARON 0.1
+
+import testify.MyBill
+import testify.BillStatusTable
+import testify.MyBillContentsArticle
+ 
+page:MyBill
+(
+	contentsArticle MyBillContentsArticle ()
+	statusTable BillStatusTable ()
+	
+)

@@ -1,0 +1,15 @@
+# ARON 0.1
+
+import testify.MyMain
+import testify.MainSearchForm
+import testify.MainResultsItem
+
+page:MyMain
+(
+	title "Testify"
+	searchForm MainSearchForm
+	(
+		q ""
+		start "0"
+	)
+)

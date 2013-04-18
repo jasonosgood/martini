@@ -1,0 +1,69 @@
+personalized bill tracking
+	shareable
+	
+predicted vs actual voting
+contact mgr for lobby
+
+visualizations for bills
+	sequence diagrams
+	"neopolian's march" (attrition)
+	
+conduit for feedback
+	cc messages
+	cc responses
+	searchable
+
+email list aggregator for 
+	multiple subscriptions, match received, do delta, remove variations (prevent inferring which email accounts were used)
+	
+rank legislators
+	clustering
+	sponsored
+	cosponsor
+
+per bill
+	URLs for hearings
+		roster
+		transcripts
+	google news feeds
+
+testifying
+	types of statements
+		pro
+		con
+		neutral
+	editable, versioned
+	
+	votes up
+
+organization profiles
+	platform
+	diaries
+	comments
+	
+user profiles
+	platform
+	diaries
+	comments
+	
+voting rankings/ratings (e.g. LCV, WEA)
+	
+find your legislator
+	cluster by voting
+	
+alerts
+	email
+	sms
+	voicemail ?
+	
+testify
+	get testify.com domain
+	bill's page links to original
+	facebook like button
+	
+	search results show status of bill (passed, etc) along with last update
+	
+	links to RCW, WACs
+	
+	
+	
