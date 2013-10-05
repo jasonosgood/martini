@@ -18,7 +18,7 @@
 		<link>
 			<name>jettylib</name>
 			<type>2</type>
-			<location>/Applications/jetty-distribution-8.0.4.v20111024</location>
+			<location>/Applications/jetty-distribution-8.1.11.v20130520</location>
 		</link>
 	</linkedResources>
 </projectDescription>

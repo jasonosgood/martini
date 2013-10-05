@@ -11,9 +11,14 @@ public class Util
 
     public static String firstCharLower( String propertyName ) 
     {
-        if (propertyName.length() == 0) return null;
+    	if( propertyName == null ) return null;
+        if( propertyName.length() == 0 ) return null;
         return propertyName.substring( 0, 1 ).toLowerCase() + propertyName.substring( 1 );
     }
 
+    public static boolean hasText( String text )
+    {
+    	return text != null && text.length() > 0;
+    }
 
 }

@@ -12,4 +12,37 @@ extends
 	{
 		add( option );
 	}
+	
+	public void setValue( String value ) 
+	{
+		if( value == null || value.length() == 0 ) return;
+		for( Option option : this )
+		{
+			String temp = null;
+			if( option.hasValue() )
+			{
+				temp = option.getValue();
+			}
+			else
+			{
+				temp = option.getText();
+			}
+				
+			boolean selected = value.equals( temp );
+			
+			option.setSelected( selected );
+		}
+	}
+	
+	public String getValue() 
+	{
+		for( Option option : this )
+		{
+			if( option.getSelected() )
+			{
+				return option.getValue();
+			}
+		}
+		return null;
+	}
 }

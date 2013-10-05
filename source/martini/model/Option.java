@@ -10,6 +10,11 @@ public class
 		_value = value;
 	}
 	
+	public boolean hasValue()
+	{
+		return _value != null;
+	}
+	
 	public String getValue()
 	{
 		return _value;
@@ -37,6 +42,11 @@ public class
 	public boolean getSelected()
 	{
 		return _selected;
+	}
+	
+	public String toString()
+	{
+		return String.format( "text: %s value: %s selected: %b", _text, _value, _selected );
 	}
 	
 }

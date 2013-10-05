@@ -9,10 +9,12 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 
+import martini.ModelBuilder.BooleanInput;
 import martini.ModelBuilder.Cell;
 import martini.ModelBuilder.ListItem;
 import martini.ModelBuilder.ListItemParameter;
 import martini.ModelBuilder.Row;
+import martini.ModelBuilder.TextInput;
 
 
 public class 
@@ -127,39 +129,50 @@ public class
 			pw.printf( "\t(\n" );
 			for( ModelBuilder.Input input : form.inputList )
 			{
-				if( !"submit".equals( input.type ) && input.name != null )
+				String key = firstCharLower( input.name );
+				if( input instanceof TextInput )
 				{
-					String key = firstCharLower( input.name );
-					String value = input.value;
+					TextInput text = (TextInput) input;
+					String value = text.value;
 					if( value == null ) value = "";
 					pw.printf( "\t\t%s \"%s\"\n", key, value.trim() );
+				}
+				else
+				if( input instanceof BooleanInput )
+				{
+					BooleanInput temp = (BooleanInput) input;
+					pw.printf( "\t\t%s %s\n", key, temp.value );
 				}
 			}
 	
 			for( ModelBuilder.Select select : form.selectList )
 			{
-				String selectCls = "Select";
 				String selectProp = firstCharLower( select.name );
-				pw.printf( "\t\t%s %s\n", selectProp, selectCls );
-				pw.printf( "\t\t(\n" );
-				pw.printf( "\t\t\toption\n" );
-				pw.printf( "\t\t\t[\n" );
+				pw.printf( "\t\t%s \n", selectProp );
+				pw.printf( "\t\t[\n" );
 				for( ModelBuilder.Option option : select.optionList )
 				{
-					pw.printf( "\t\t\t\tOption\n" );
-					pw.printf( "\t\t\t\t(\n" );
-					String value = firstCharLower( option.value );
-					if( value == null ) value = "";
+					pw.printf( "\t\t\tOption\n" );
+					pw.printf( "\t\t\t(\n" );
+					if( option.value != null )
+					{
+						String value = firstCharLower( option.value );
+//						if( value == null ) value = "";
+						pw.printf( "\t\t\t\tvalue \"%s\"\n", value );
+					}
 					String text = option.text;
 					if( text == null ) text = "";
-					String selected = option.selected ? "true" : "false";
-					pw.printf( "\t\t\t\t\tvalue \"%s\"\n", value );
-					pw.printf( "\t\t\t\t\ttext \"%s\"\n", text.trim() );
-					pw.printf( "\t\t\t\t\tselected %s\n", selected );
-					pw.printf( "\t\t\t\t)\n" );
+					pw.printf( "\t\t\t\ttext \"%s\"\n", text.trim() );
+					
+//					String selected = option.selected ? "true" : "false";
+//					pw.printf( "\t\t\t\t\tselected %s\n", selected );
+					if( option.selected )
+					{
+						pw.printf( "\t\t\t\tselected true\n" );
+					}
+					pw.printf( "\t\t\t)\n" );
 				}
-				pw.printf( "\t\t\t]\n" );
-				pw.printf( "\t\t)\n" );
+				pw.printf( "\t\t]\n" );
 			}
 	
 			pw.printf( "\t)\n" );

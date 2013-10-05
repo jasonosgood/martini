@@ -1,3 +1,5 @@
 # Page list to preload
-source/testify/MyMain.aron
-source/testify/MyBill.aron
+#generated/java/blog/Blog.aron
+source/blog/MyBlog.aron
+#source/testify/MyMain.aron
+#source/testify/MyBill.aron

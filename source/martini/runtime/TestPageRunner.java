@@ -22,7 +22,9 @@ public class
 	public static void main( String[] args ) 
 		throws Exception
 	{
-		Class<?> pageClass = Class.forName( "testify.Main" );
+//		Class<?> pageClass = Class.forName( "testify.Main" );
+		String name = args[0];
+		Class<?> pageClass = Class.forName( name );
 		
 		String resource = pageClass.getName().replace( '.', '/' ).concat( ".aron" );
 		InputStream in = pageClass.getClassLoader().getResourceAsStream( resource );
@@ -45,7 +47,7 @@ public class
 				HttpServletRequest request = new MockServletRequest();
 				HttpServletResponse response = new MockServletResponse();
 
-				page.handle( null, response );
+				page.handle( request, response );
 				page.afterHandle();
 
 //				Page model = (Page) temp;

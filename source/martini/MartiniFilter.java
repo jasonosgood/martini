@@ -3,6 +3,8 @@ package martini;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.Reader;
+import java.util.Map;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -70,16 +72,25 @@ implements
 			return;
 		}
 		
-		System.out.printf( "request: %s ACCEPTED\n",  uri );
+		
+		System.out.printf( "request: %s %s ACCEPTED\n", httpRequest.getMethod(), uri );
 				
-		response.setContentType( "text/html" ); // WTF? Why this one?
+		
+		httpResponse.setContentType( "text/html" ); // WTF? Why this one?
+		
+		httpResponse.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); // HTTP 1.1.
+		httpResponse.setHeader("Pragma", "no-cache"); // HTTP 1.0.
+		httpResponse.setDateHeader("Expires", 0); // Proxies.
+		
 		boolean done = false;
 		while( !done )
 		{
 			try
 			{
 				page._request = httpRequest;
-				page.populateForm();
+//			        char[] buffer = new char[request.getContentLength()];
+
+//				page.populateForm();
 				page.beforeHandle();
 				page.handle( httpRequest, httpResponse );
 				page.afterHandle();

@@ -82,6 +82,10 @@ public class
 		if( _stack.match( "**/form[martini]" ))
 		{
 			recurse = false;
+
+			String formID = getMartiniID( parent );
+			_builder.addForm( formID );
+
 			form( parent );
 		}
 		else
@@ -150,31 +154,63 @@ public class
 		}
 	}
 
-	public void form( Element form ) 
+	public void form( Element parent ) 
 	{
-		String formID = getMartiniID( form );
-		_builder.addForm( formID );
-		for( Element input : form.find( "input" ))
+		for( Content x : parent )
 		{
-			String type = input.getAttributeValue( "type" );
-			String name = input.getAttributeValue( "name" );
-			String value = input.getAttributeValue( "value" );
-			_builder.addInput( type, name, value );
-		}
-		
-		for( Element select : form.find( "select" ))
-		{
-			String name = select.getAttributeValue( "name" );
-			_builder.addSelect( name );
-			for( Element option : select.find( "option" ))
+			if( x instanceof Element )
 			{
-				String value = option.getAttributeValue( "value" );
-				String text = option.getText();
-				boolean selected = option.hasAttribute( "selected" );
-				_builder.addOption( value, text, selected );
+				Element child = (Element) x;
+				if( "input".equalsIgnoreCase( child.name() )) 
+				{
+					String type = child.getAttributeValue( "type" );
+					String name = child.getAttributeValue( "name" );
+					switch( type )
+					{
+						case "text":
+						{
+							String value = child.getAttributeValue( "value" );
+							_builder.addTextInput( type, name, value );
+							break;
+						}
+						case "checkbox":
+						{
+							boolean value = child.hasAttribute( "checked" );
+							_builder.addBooleanInput( type, name, value );
+							break;
+						}
+						case "submit":
+						{
+							_builder.addSubmitInput( type, name );
+							break;
+						}
+						default:
+							break;
+					}
+					continue;
+				}
+				
+				if( "select".equalsIgnoreCase( child.name() )) 
+				{
+					String name = child.getAttributeValue( "name" );
+					if( name == null )
+					{
+						System.out.println( "ignoring select\n" + child.toString() );
+					}
+					_builder.addSelect( name );
+					for( Element option : child.find( "option" ))
+					{
+						String text = option.getText();
+						String value = option.getAttributeValue( "value" );
+						boolean selected = option.hasAttribute( "selected" );
+						_builder.addOption( value, text, selected );
+					}
+					
+					removeAllButFirst( child, "option" );
+					continue;
+				}
+				form( child );
 			}
-			
-			removeAllButFirst( select, "option" );
 		}
 	}
 	

@@ -63,7 +63,7 @@ public class ModelBuilder
 	public void addTable( String id )
 	{
 		table = new Table();
-		table.id = firstCharUpper( id );
+		table.id = firstCharUpper( id.trim() );
 		tableList.add( table );
 	}
 	
@@ -88,7 +88,7 @@ public class ModelBuilder
 	public void addCell( String id, String value )
 	{
 		cell = new Cell();
-		cell.id = firstCharUpper( id );
+		cell.id = firstCharUpper( id.trim() );
 		cell.value = value;
 		row.cellList.add( cell );
 	}
@@ -101,11 +101,24 @@ public class ModelBuilder
 		ArrayList<Select> selectList = new ArrayList<Select>();
 	}
 	
-	static class Input
+	static abstract class Input
 	{
 		String type;
 		String name;
+	}
+	
+	static class SubmitInput extends Input
+	{
+	}
+	
+	static class TextInput extends Input
+	{
 		String value;
+	}
+	
+	static class BooleanInput extends Input
+	{
+		boolean value;
 	}
 	
 	static class Select
@@ -131,23 +144,43 @@ public class ModelBuilder
 	public void addForm( String id )
 	{
 		form = new Form();
-		form.id = firstCharUpper( id );
+		form.id = firstCharUpper( id.trim() );
 		formList.add( form );
 	}
 	
-	public void addInput( String type, String name, String value )
+	public void addSubmitInput( String type, String name )
 	{
-		input = new Input();
-		input.type = type;
-		input.name = firstCharUpper( name );
-		input.value = value;
+		SubmitInput temp = new SubmitInput();
+		temp.type = type;
+		temp.name = firstCharUpper( name.trim() );
+		input = temp;
+		form.inputList.add( input );
+	}
+	
+	public void addTextInput( String type, String name, String value )
+	{
+		TextInput temp = new TextInput();
+		temp.type = type;
+		temp.name = firstCharUpper( name.trim() );
+		temp.value = value;
+		input = temp;
+		form.inputList.add( input );
+	}
+	
+	public void addBooleanInput( String type, String name, boolean value )
+	{
+		BooleanInput temp = new BooleanInput();
+		temp.type = type;
+		temp.name = firstCharUpper( name.trim() );
+		temp.value = value;
+		input = temp;
 		form.inputList.add( input );
 	}
 	
 	public void addSelect( String name )
 	{
 		select = new Select();
-		select.name = firstCharUpper( name );
+		select.name = firstCharUpper( name.trim() );
 		form.selectList.add( select );
 	}
 	
@@ -193,7 +226,7 @@ public class ModelBuilder
     public void addList( String id )
     {
     	list = new List();
-    	list.id = firstCharUpper( id );
+    	list.id = firstCharUpper( id.trim() );
     	listList.add( list );
     }
     
@@ -207,7 +240,7 @@ public class ModelBuilder
     {
     	itemParam = new ListItemParameter();
     	itemParam.kind = kind;
-    	itemParam.id = firstCharUpper( id );
+    	itemParam.id = firstCharUpper( id.trim() );
     	item.paramList.add( itemParam );
     }
 
@@ -223,7 +256,7 @@ public class ModelBuilder
 	{
 		Article article = new Article();
 		article.element = element;
-		article.id = firstCharUpper( id );
+		article.id = firstCharUpper( id.trim() );
 		articleList.add( article );
 	}
 
@@ -239,7 +272,7 @@ public class ModelBuilder
 	public void addProperty( String id, String text, String href )
 	{
 		Property property = new Property();
-		property.id = id;
+		property.id = id.trim();
 		property.text = text;
 		property.href = href;
 		propertyList.add( property );

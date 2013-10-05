@@ -64,6 +64,7 @@ public class
 	{
 		_writer = writer;
 		_xmlWriter = new XMLWriter( writer );
+//		_xmlWriter.setPretty( true );
 		_stack = new java.util.Stack<String>();
 	}
 	
@@ -177,6 +178,24 @@ public class
 		}
 	}
 	
+	public void attribute( String name )
+			throws IOException
+		{
+			if( name == null )
+			{
+				throw new NullPointerException( "name" );
+			}
+			
+			if( !_tailed )
+			{
+				_xmlWriter.attribute( name );
+			}
+			else
+			{
+				throw new IllegalStateException( "cannot add Attribute to closed Element" );
+			}
+		}
+		
 	public void text( Object value )
 		throws IOException
 	{

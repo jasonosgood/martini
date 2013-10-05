@@ -22,6 +22,7 @@ import lox.Whitespace;
 
 import static martini.util.Util.firstCharLower;
 import static martini.util.Util.firstCharUpper;
+import static martini.util.Util.hasText;
 import static martini.Gleen.getMartiniID;
 import static martini.Gleen.getMartiniOptional;
 
@@ -54,17 +55,22 @@ public class PageGenerator
 	// Used to record which forms need to be prepopulated
 	static class Form
 	{
+//		enum Kind { input, select };
 		String id;
 		String name;
+//		Kind kind;
+		String type;
 	}
 	
 	ArrayList<Form> _formList = new ArrayList<Form>();
 	
-	void addForm( String id, String name )
+	void addForm( String id, String name, String type )
 	{
 		Form form = new Form();
 		form.id = id;
 		form.name = name;
+		form.type = type;
+//		form.kind = kind;
 		_formList.add( form );
 	}
 	
@@ -80,6 +86,7 @@ public class PageGenerator
 		println( "import martini.model.Page;" );
 		println( "import martini.HTMLBuilder;" );
 		println( "import martini.model.*;" );
+		println( "import static martini.util.Util.hasText;" );
 		println( "import java.util.List;" );
 		println( "import java.util.ArrayList;" );
 		println( "import java.util.Map;" );
@@ -233,14 +240,34 @@ public class PageGenerator
 		println( "public void populateForm()" );
 		println( "{" );
 		tabs++;
+		println( "if( !hasParameters() ) return;" );
 		if( !_formList.isEmpty() )
 		{
 			for( Form form : _formList ) 
 			{
 				String method = firstCharUpper( form.name );
-				println( "get" + form.id + "Form().set" + method + "( getRequestParameter(  \"" + form.name + "\" )); " );
+				switch( form.type )
+				{
+					case "text":
+					{
+						println( "get" + form.id + "Form().set" + method + "( getRequestParameter( \"" + form.name + "\" )); " );
+						break;
+					}
+					case "checkbox":
+					case "radio":
+					{
+						println( "get" + form.id + "Form().set" + method + "( hasRequestParameter( \"" + form.name + "\" )); " );
+						break;
+					}
+					case "select":
+					{
+						println( "get" + form.id + "Form().get" + method + "().setValue( getRequestParameter( \"" + form.name + "\" )); " );
+						break;
+					}
+					default:
+						break;
+				}
 			}
-			
 		}
 		tabs--;
 		println( "}" );
@@ -329,7 +356,7 @@ public class PageGenerator
 		}
 		
 		println( "element( \"" + element.name() +  "\" );" );
-		
+
 		for( Attribute attribute : element.attributes() )
 		{
 			attribute( attribute );
@@ -373,21 +400,64 @@ public class PageGenerator
 			current = Kind.UL;
 		}
 		else
-		if( _stack.match( "**/form[martini]/select[name]" ))
+		if( _stack.match( "**/form[martini]/**/select[name]" ))
 		{
-			String formID = firstCharUpper( getMartiniID( _stack.peek( 1 ) ));
+			Element peek = _stack.peek( "form" );
+			String formID = firstCharUpper( getMartiniID( peek ));
 			String name = element.getAttributeValue( "name" );
-			addForm( formID, name );
+			addForm( formID, name, "select" );
 			name = firstCharUpper( name );
 			String chain = "Option option : get" + formID + "Form().get" + name + "()";
 			println( "for( " + chain + " )" );
 			println( "{" );
 			tabs++;
+			
+			println( "element( \"option\" );" );
+			println( "String value = option.getValue();" );
+			println( "if( hasText( value ))" );
+			println( "{" );
+			println( "\tattribute( \"value\", value );" );
+			println( "}" );
+			println( "if( option.getSelected() )" );
+			println( "{" );
+			println( "\tattribute( \"selected\", \"selected\" );" );
+			println( "}" );
+			println( "text( option.getText() );" );
+			println( "pop();" );
+
 			current = Kind.FORM;
+		}
+		else
+		if( _stack.match( "**/form[martini]/**/input[name]" ))
+		{
+			Element input = _stack.peek();
+			String type = input.getAttributeValue( "type" );
+			String name = input.getAttributeValue( "name" );
+			
+			Element form = _stack.peek( "form" );
+			String formID = firstCharUpper( getMartiniID( form ));
+			
+			addForm( formID, name, type );
+			
+			if( "checkbox".equals( type ))
+			{
+				// TODO: Remember state for radio and checkbox
+				name = firstCharUpper( name );
+				String chain = "get" + formID + "Form().get" + name + "()";
+				
+				println( "if( " + chain + " ) {" );
+				println( "\tattribute( \"checked\" );" );
+				println( "}" );
+			}
 		}
 		
 		for( Content content : element )
 		{
+			if( content instanceof Element )
+			{
+				String name = ((Element) content).name();
+				if( "option".equals( name )) continue;
+			}
 			dispatch( content );
 		}
 		
@@ -418,22 +488,45 @@ public class PageGenerator
 		String value = attribute.value().toString();
 		String chain = null;
 
-		if( _stack.match( "**/form[martini]/input[name]") && "value".equalsIgnoreCase( key ))
+		if( _stack.match( "**/form[martini]/**/input[name]"))
 		{
+			// Get current element (parent to this attribute)
 			Element element = _stack.peek();
-			String type = element.getAttributeValue( "type", "text" );
-			if( !"submit".equalsIgnoreCase( type ))
+			// TODO handle missing input type
+			String type = element.getAttributeValue( "type", "text" ).toLowerCase();
+			switch( type )
 			{
-				String formID = firstCharUpper( getMartiniID( _stack.peek( 1 )));
-				String name = element.getAttributeValue( "name" );
-				
-				addForm( formID, name );
-				name = firstCharUpper( name );
-				chain = "get" + formID + "Form().get" + name + "()";
+				case "text":
+				{
+					if( "value".equalsIgnoreCase( key ))
+					{
+						Element peek = _stack.peek( "form" );
+						String formID = firstCharUpper( getMartiniID( peek ));
+						String name = element.getAttributeValue( "name" );
+						name = firstCharUpper( name );
+						chain = "get" + formID + "Form().get" + name + "()";
+					}
+					break;
+				}
+				case "checkbox":
+				{
+					// do not output, checked attribute is handled elsewhere
+					if( "checked".equalsIgnoreCase( key )) return;
+					break;
+				}
+				case "submit":
+				{
+					// do nothing
+					break;
+				}
+				default:
+				{
+					break;
+				}
 			}
 		}
 		else
-		if( _stack.match( "**/form[martini]/select[name]/option" ))
+		if( _stack.match( "**/form[martini]/**/select[name]/option" ))
 		{
 			if( "value".equalsIgnoreCase( key ))
 			{
@@ -512,7 +605,7 @@ public class PageGenerator
 			}
 		}
 		else
-		if( _stack.match( "**/form[martini]/select[name]/option" ))
+		if( _stack.match( "**/form[martini]/**/select[name]/option" ))
 		{
 			chain = "option.getText()";
 		}
@@ -553,7 +646,7 @@ public class PageGenerator
 	}
 	
 	public void pi( ProcessingInstruction pi )
-	throws IOException
+		throws IOException
 	{
 		
 	}
@@ -564,7 +657,6 @@ public class PageGenerator
 		if( node instanceof CDATA )
 		{
 			cdata( (CDATA) node );
-			
 		}
 		else
 		if( node instanceof Comment )

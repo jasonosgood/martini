@@ -22,6 +22,7 @@ import org.ccil.cowan.tagsoup.Parser;
 import org.xml.sax.InputSource;
 
 import aron.ARONReader;
+import aron.ARONWriter;
 
 public class ModelGenerator 
 {
@@ -176,6 +177,9 @@ public class ModelGenerator
 					writeModels( builder, targetRoot, pkg, name );
 					ARONGenerator aron = new ARONGenerator();
 					aron.writeModelData( builder, sourceFile, targetRoot, pkg, name );
+//					ARONWriter writer = new ARONWriter( System.out );
+//					writer.write( builder );
+					
 				}
 				else
 				{
@@ -451,11 +455,19 @@ public class ModelGenerator
 		pw.printf( "extends \n" );
 		pw.printf( "	Form<%s>\n", page ); 
 		pw.printf( "{\n" );
+		// TODO: preserve original order of elements
 		for( ModelBuilder.Input input : form.inputList )
 		{
 			if( !"submit".equals( input.type ) && input.name != null )
 			{
-				writeAccessor( pw, input.name );
+				if( "checkbox".equals( input.type ))
+				{
+					writeAccessorBoolean( pw, input.name );
+				}
+				else
+				{
+					writeAccessor( pw, input.name );
+				}
 			}
 		}
 		for( ModelBuilder.Select select : form.selectList )
@@ -554,9 +566,22 @@ public class ModelGenerator
 		String upper = name;
 		String lower = firstCharLower( name );
 		
-		pw.printf( "	private %s _%s = null;\n", klass, lower );
+		pw.printf( "//	private %s _%s = null;\n", klass, lower );
+		pw.printf( "	private %s _%s = new %s();\n", klass, lower, klass );
 		pw.printf( "	public %s get%s() { return _%s; }\n", klass, upper, lower );
 		pw.printf( "	public void set%s( %s %s ) { _%s = %s; }\n", upper, klass, lower, lower, lower );
+		pw.println();
+	}
+	
+	public void writeAccessorBoolean( PrintWriter pw, String name )
+		throws IOException
+	{
+		String upper = name;
+		String lower = firstCharLower( name );
+		
+		pw.printf( "	private boolean _%s = false;\n", lower );
+		pw.printf( "	public boolean get%s() { return _%s; }\n", upper, lower );
+		pw.printf( "	public void set%s( boolean %s ) { _%s = %s; }\n", upper, lower, lower, lower );
 		pw.println();
 	}
 }
