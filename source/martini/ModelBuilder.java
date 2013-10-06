@@ -99,6 +99,7 @@ public class ModelBuilder
 		String id;
 		ArrayList<Input> inputList = new ArrayList<Input>();
 		ArrayList<Select> selectList = new ArrayList<Select>();
+		ArrayList<Textarea> textareaList = new ArrayList<Textarea>();
 	}
 	
 	static abstract class Input
@@ -134,12 +135,19 @@ public class ModelBuilder
 		boolean selected;
 	}
 	
+	static class Textarea
+	{
+		String name;
+		String value;
+	}
+	
 	ArrayList<Form> formList = new ArrayList<Form>();
 	
 	Form form;
 	Input input;
 	Select select;
 	Option option;
+	Textarea textarea;
 	
 	public void addForm( String id )
 	{
@@ -192,7 +200,14 @@ public class ModelBuilder
 		option.selected = selected;
 		select.optionList.add( option );
 	}
-	
+
+	public void addTextarea( String name, String value )
+	{
+		textarea = new Textarea();
+		textarea.name = firstCharUpper( name.trim() );
+		textarea.value = value;
+		form.textareaList.add( textarea );
+	}
 	
 	static class List
 	{

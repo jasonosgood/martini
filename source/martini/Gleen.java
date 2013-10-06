@@ -15,6 +15,7 @@ import lox.Document;
 import lox.Element;
 import lox.LOXHandler;
 import lox.Stack;
+import lox.Text;
 
 // TODO Logging for found matches, to add with usage/debugging
 
@@ -209,6 +210,24 @@ public class
 					removeAllButFirst( child, "option" );
 					continue;
 				}
+				
+				if( "textarea".equalsIgnoreCase( child.name() )) 
+				{
+					String name = child.getAttributeValue( "name" );
+					if( name == null )
+					{
+						System.out.println( "ignoring textarea\n" + child.toString() );
+					}
+					StringBuilder sb = new StringBuilder();
+					for( Content y : child )
+					{
+						sb.append( y.toString() );
+					}
+					_builder.addTextarea( name, sb.toString() );
+					continue;
+				}
+				
+				
 				form( child );
 			}
 		}

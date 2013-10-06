@@ -23,8 +23,10 @@ import lox.Whitespace;
 import static martini.util.Util.firstCharLower;
 import static martini.util.Util.firstCharUpper;
 import static martini.util.Util.hasText;
+import static martini.util.Util.escape;
 import static martini.Gleen.getMartiniID;
 import static martini.Gleen.getMartiniOptional;
+
 
 public class PageGenerator 
 {
@@ -55,22 +57,19 @@ public class PageGenerator
 	// Used to record which forms need to be prepopulated
 	static class Form
 	{
-//		enum Kind { input, select };
 		String id;
 		String name;
-//		Kind kind;
 		String type;
 	}
 	
 	ArrayList<Form> _formList = new ArrayList<Form>();
 	
-	void addForm( String id, String name, String type )
+	void addFormProperty( String id, String name, String type )
 	{
 		Form form = new Form();
 		form.id = id;
 		form.name = name;
 		form.type = type;
-//		form.kind = kind;
 		_formList.add( form );
 	}
 	
@@ -249,6 +248,7 @@ public class PageGenerator
 				switch( form.type )
 				{
 					case "text":
+					case "textarea":
 					{
 						println( "get" + form.id + "Form().set" + method + "( getRequestParameter( \"" + form.name + "\" )); " );
 						break;
@@ -405,7 +405,7 @@ public class PageGenerator
 			Element peek = _stack.peek( "form" );
 			String formID = firstCharUpper( getMartiniID( peek ));
 			String name = element.getAttributeValue( "name" );
-			addForm( formID, name, "select" );
+			addFormProperty( formID, name, "select" );
 			name = firstCharUpper( name );
 			String chain = "Option option : get" + formID + "Form().get" + name + "()";
 			println( "for( " + chain + " )" );
@@ -437,7 +437,7 @@ public class PageGenerator
 			Element form = _stack.peek( "form" );
 			String formID = firstCharUpper( getMartiniID( form ));
 			
-			addForm( formID, name, type );
+			addFormProperty( formID, name, type );
 			
 			if( "checkbox".equals( type ))
 			{
@@ -450,6 +450,21 @@ public class PageGenerator
 				println( "}" );
 			}
 		}
+		else
+		if( _stack.match( "**/form[martini]/**/textarea[name]" ))
+		{
+			// Merge Whitespace and Text elements into one Text
+			StringBuilder sb = new StringBuilder();
+			Element textarea = _stack.peek();
+			for( Content c : textarea )
+			{
+				sb.append( c.toString() );
+			}
+			textarea.clear();
+			Text text = new Text( sb.toString() );
+			textarea.add( text );
+		}
+
 		
 		for( Content content : element )
 		{
@@ -574,8 +589,8 @@ public class PageGenerator
 		else
 		if( _stack.match( "**/table[martini]/thead/tr/th[martini]" ))
 		{
-			String tableID = firstCharUpper( getMartiniID( _stack.peek( 3 )) );
-			String fieldID = firstCharUpper( getMartiniID( _stack.peek( 0 )) );
+			String tableID = firstCharUpper( getMartiniID( _stack.peek( 3 )) ); // table
+			String fieldID = firstCharUpper( getMartiniID( _stack.peek( 0 )) ); // th
 			chain = "get" + tableID + "Table().getHeader().get" + fieldID + "()"; 
 		}
 		else
@@ -614,7 +629,7 @@ public class PageGenerator
 		if( _stack.match( "**/*[martini]" ))
 		{
 			Element property = _stack.peek();
-			boolean yikes = property.hasChildren();
+//			boolean yikes = property.hasChildren();
 			List<Element> children = property.find( "*" );
 			if( children.isEmpty() )
 			{
@@ -622,6 +637,21 @@ public class PageGenerator
 				chain = "get" + id + "()";
 			}
 		}
+		else
+		if( _stack.match( "**/form[martini]/**/textarea[name]" ))
+		{
+			Element textarea = _stack.peek();
+			String name = textarea.getAttributeValue( "name" );
+			
+			Element form = _stack.peek( "form" );
+			String formID = firstCharUpper( getMartiniID( form ));
+			
+			addFormProperty( formID, name, "textarea" );
+			
+			name = firstCharUpper( name );
+			chain = "get" + formID + "Form().get" + name + "()";
+		}
+
 		
 		if( chain != null )
 		{
@@ -730,38 +760,5 @@ public class PageGenerator
 		println();
 	}
 		
-	public String escape( String text )
-	{
-		StringBuilder sb = new StringBuilder( text.length() + 100 );
-		char[] ca = text.toCharArray();
-		int size = ca.length;
-		for( int nth = 0; nth < size; nth++ )
-		{
-			char c = ca[nth];
-			switch( c )
-			{
-				case '\t':
-					sb.append( "\\t" );
-					break;
-					
-				case '\n':
-					sb.append( "\\n" );
-					break;
-				
-				case '\r':
-					sb.append( "\\r" );
-					break;
-					
-				case '"':
-					sb.append( "\\\"" );
-					break;
-					
-				default:
-					sb.append( c );
-					break;
-			}
-		}
-		return sb.toString();
-	}
 
 }

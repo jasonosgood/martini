@@ -474,6 +474,10 @@ public class ModelGenerator
 		{
 			writeAccessor( pw, "Select", select.name );
 		}
+		for( ModelBuilder.Textarea textarea : form.textareaList )
+		{
+			writeAccessor( pw, textarea.name );
+		}
 		pw.printf( "}\n" );
 		pw.close();
 	}
@@ -566,7 +570,6 @@ public class ModelGenerator
 		String upper = name;
 		String lower = firstCharLower( name );
 		
-		pw.printf( "//	private %s _%s = null;\n", klass, lower );
 		pw.printf( "	private %s _%s = new %s();\n", klass, lower, klass );
 		pw.printf( "	public %s get%s() { return _%s; }\n", klass, upper, lower );
 		pw.printf( "	public void set%s( %s %s ) { _%s = %s; }\n", upper, klass, lower, lower, lower );

@@ -4,6 +4,7 @@ package martini;
 // TODO: Add source and timestamp to generated header
 
 import static martini.util.Util.firstCharLower;
+import static martini.util.Util.escape;
 
 import java.io.File;
 import java.io.IOException;
@@ -15,6 +16,7 @@ import martini.ModelBuilder.ListItem;
 import martini.ModelBuilder.ListItemParameter;
 import martini.ModelBuilder.Row;
 import martini.ModelBuilder.TextInput;
+import martini.ModelBuilder.Textarea;
 
 
 public class 
@@ -157,15 +159,12 @@ public class
 					if( option.value != null )
 					{
 						String value = firstCharLower( option.value );
-//						if( value == null ) value = "";
 						pw.printf( "\t\t\t\tvalue \"%s\"\n", value );
 					}
 					String text = option.text;
 					if( text == null ) text = "";
 					pw.printf( "\t\t\t\ttext \"%s\"\n", text.trim() );
 					
-//					String selected = option.selected ? "true" : "false";
-//					pw.printf( "\t\t\t\t\tselected %s\n", selected );
 					if( option.selected )
 					{
 						pw.printf( "\t\t\t\tselected true\n" );
@@ -173,6 +172,16 @@ public class
 					pw.printf( "\t\t\t)\n" );
 				}
 				pw.printf( "\t\t]\n" );
+			}
+	
+			for( Textarea textarea : form.textareaList )
+			{
+				String key = firstCharLower( textarea.name );
+				String value = textarea.value;
+				if( value == null ) value = "";
+				// Literal text, do not trim textarea values
+				value = escape( value );
+				pw.printf( "\t\t%s \"%s\"\n", key, value );
 			}
 	
 			pw.printf( "\t)\n" );
