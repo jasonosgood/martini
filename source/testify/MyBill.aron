@@ -1,12 +1,11 @@
 # ARON 0.1
 
-import testify.MyBill
-import testify.BillStatusTable
+include Bill.aron
+
+import testify.BillHandler
 import testify.MyBillContentsArticle
- 
-page:MyBill
-(
-	contentsArticle MyBillContentsArticle ()
-	statusTable BillStatusTable ()
-	
-)
+import testify.BillStatusTable
+
+@page.handler BillHandler
+@page.contentsArticle MyBillContentsArticle
+@page.statusTable BillStatusTable

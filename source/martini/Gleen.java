@@ -169,6 +169,7 @@ public class
 					switch( type )
 					{
 						case "text":
+						case "hidden":
 						{
 							String value = child.getAttributeValue( "value" );
 							_builder.addTextInput( type, name, value );

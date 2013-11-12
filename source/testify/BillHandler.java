@@ -5,6 +5,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.List;
 
+import martini.model.Handler;
 import martini.runtime.RedirectException;
 import testify.billsummary.LegDetailsSelect;
 import testify.billsummary.LegDetailsSelectResultSet;
@@ -14,13 +15,13 @@ import testify.billsummary.SelectLegStatusByID;
 import testify.billsummary.SelectLegStatusByIDResultSet;
 
 public class
-	MyBill
+	BillHandler
 extends 
-	Bill
+	Handler<Bill>
 {
 	static String driver = "org.h2.Driver";
 //	static String url = "jdbc:h2:tcp://localhost/~/firstreading";
-	static String url = "jdbc:h2:tcp://localhost/~/Projects/Camper/testify/h2/testify";
+	static String url = "jdbc:h2:/Users/jasonosgood/git/martini/db/testify";
 	static String username = "sa";
 	static String password = "";
 
@@ -33,22 +34,23 @@ extends
 	}
 
 	@Override
-	public void beforeHandle()
+	public void setup()
 		throws Exception
 	{
 		int legislationID = 0;
-		String biennium = getBienniumParam();
+		Bill page = getPage();
+		String biennium = page.getBienniumParam();
 		String billID = "HB 0000";
-		int billNumber = Integer.valueOf( getBillNumberParam() );
+		int billNumber = Integer.valueOf( page.getBillNumberParam() );
 		String legal = "legal title";
 		String desc = "long description";
 		int companion = 0;
 		
 		Connection connection = getConnection();
-		LegDetailsSelect details = new LegDetailsSelect( connection );
+		LegDetailsSelect details = new LegDetailsSelect();
 		details.setBiennium( biennium );
 		details.setBillNumber( billNumber );
-		LegDetailsSelectResultSet rsDetails = details.getResultSet();
+		LegDetailsSelectResultSet rsDetails = details.execute( connection );
 		if( rsDetails.hasNext() )
 		{
 			legislationID = rsDetails.getID();
@@ -64,43 +66,44 @@ extends
 			billNotFound.setBillID( billNumber );
 			throw new RedirectException( billNotFound );
 		}
-		details.close();
+		rsDetails.close();
 		
-		setTitle( "WA " + biennium + " " + billID );
-		setBiennium( biennium );
-		setBillID( billID );
-		setDesc( desc );
-		setLegal( legal  );
+		page.setTitle( "WA " + biennium + " " + billID );
+		page.setBiennium( biennium );
+		page.setBillID( billID );
+		page.setDesc( desc );
+		page.setLegal( legal  );
 
-		setDisplayCompanion( companion != 0 );
-		setCompanion( companion );
-		setCompanionHref( "/bill/" + biennium + "/" + companion );
+		page.setDisplayCompanion( companion != 0 );
+		page.setCompanion( companion );
+		page.setCompanionHref( "/bill/" + biennium + "/" + companion );
 		
 		
-		List<BillSponsorsItem> sponsors = getSponsors();
-		SelectLegSponsorsByID selectSponsor = new SelectLegSponsorsByID( connection );
-		selectSponsor.setLegislationID( legislationID );
-		SelectLegSponsorsByIDResultSet rsSponsor = selectSponsor.getResultSet();
-		while( rsSponsor.hasNext() )
+		List<BillSponsorsItem> sponsors = page.getSponsors();
+		sponsors.clear();
+		SelectLegSponsorsByID selectSponsors = new SelectLegSponsorsByID();
+		selectSponsors.setLegislationID( legislationID );
+		SelectLegSponsorsByIDResultSet selectSponsorsRS = selectSponsors.execute( connection );
+		while( selectSponsorsRS.hasNext() )
 		{
-			
 			BillSponsorsItem item = new BillSponsorsItem();
-			item.setText( rsSponsor.getLastName() );
+			item.setText( selectSponsorsRS.getLastName() );
 			sponsors.add( item );
 		}
-		selectSponsor.close();
+		selectSponsorsRS.close();
 
-		SelectLegStatusByID selectStatus = new SelectLegStatusByID( connection );
+		SelectLegStatusByID selectStatus = new SelectLegStatusByID();
 		selectStatus.setLegislationID( legislationID );
-		BillStatusTable table = getStatusTable();
-		SelectLegStatusByIDResultSet rsStatus = selectStatus.getResultSet();
-		while( rsStatus.hasNext() )
+		BillStatusTable statusTable = page.getStatusTable();
+		statusTable.getRowList().clear();
+		SelectLegStatusByIDResultSet selectStatusRS = selectStatus.execute( connection );
+		while( selectStatusRS.hasNext() )
 		{
 			BillStatusTableRow row = new BillStatusTableRow();
-			row.setDate( rsStatus.getActionDate() );
-			row.setDescription( rsStatus.getHistoryLine() );
-			table.addRow( row );
+			row.setDate( selectStatusRS.getActionDate() );
+			row.setDescription( selectStatusRS.getHistoryLine() );
+			statusTable.addRow( row );
 		}
-		selectStatus.close();
+		selectStatusRS.close();
 	}
 }

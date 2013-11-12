@@ -48,7 +48,7 @@ public class
 		File file = new File( index );
 		IndexReader reader = IndexReader.open( FSDirectory.open( file ));
 		
-		IndexSearcher searcher = new IndexSearcher( reader);
+		IndexSearcher searcher = new IndexSearcher( reader );
 		Analyzer analyzer = new StandardAnalyzer( Version.LUCENE_35 );
 
 //		QueryParser parser = new QueryParser( Version.LUCENE_35, field, analyzer );

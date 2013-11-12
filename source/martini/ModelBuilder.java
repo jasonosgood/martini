@@ -160,7 +160,10 @@ public class ModelBuilder
 	{
 		SubmitInput temp = new SubmitInput();
 		temp.type = type;
-		temp.name = firstCharUpper( name.trim() );
+		if( name != null )
+		{
+			temp.name = firstCharUpper( name.trim() );
+		}
 		input = temp;
 		form.inputList.add( input );
 	}

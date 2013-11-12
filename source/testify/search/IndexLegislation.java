@@ -29,11 +29,11 @@ import java.util.Date;
 public class IndexLegislation {
 
 	static String driver = "org.h2.Driver";
-	static String url = "jdbc:h2:tcp://localhost/~/Projects/Camper/testify/h2/testify";
+	static String url = "jdbc:h2:/Users/jasonosgood/git/martini/db/testify";
 	static String username = "sa";
 	static String password = "";
 	
-	static File root = new File( "/Users/jasonosgood/Projects/Camper" );
+	static File root = new File( "/Users/jasonosgood/Desktop/testify-data" );
 
 	public static Connection getConnection()
 		throws SQLException, ClassNotFoundException
@@ -121,10 +121,10 @@ public class IndexLegislation {
 	{
 		int count = 0;
 		Connection connection = getConnection();
-		LegislationSelectAll select = new LegislationSelectAll( connection );
-		LegDetailsSelect detailsSelect = new LegDetailsSelect( connection );
+		LegislationSelectAll select = new LegislationSelectAll();
+		LegDetailsSelect detailsSelect = new LegDetailsSelect();
 		
-		LegislationSelectAllResultSet rsAll = select.getResultSet();
+		LegislationSelectAllResultSet rsAll = select.execute( connection );
 		while( rsAll.hasNext() )
 		{
 			int id = rsAll.getID();
@@ -142,7 +142,7 @@ public class IndexLegislation {
 			
 			detailsSelect.setBiennium( biennium );
 			detailsSelect.setBillNumber( billNumber );
-			LegDetailsSelectResultSet rsDetails = detailsSelect.getResultSet();
+			LegDetailsSelectResultSet rsDetails = detailsSelect.execute( connection );
 			if( rsDetails.hasNext() )
 			{
 				
@@ -172,7 +172,8 @@ public class IndexLegislation {
 			rsDetails.close();
 			
 			
-			String link = "/testify/data/2011-12/";
+//			String link = "/testify/data/2011-12/";
+			String link = "/text/";
 
 			String path = link + Integer.toString( billNumber ) + ".txt";
 			
@@ -189,9 +190,9 @@ public class IndexLegislation {
 				BufferedReader reader = new BufferedReader( in );
 				Field contentsField = new Field( "contents", reader );
 				doc.add( contentsField );
+				System.out.println( "adding " + " " + biennium + " " + billNumber );
 			}
 			
-			System.out.println( "adding " + " " + biennium + " " + billNumber );
 			writer.addDocument(doc);
 			count++;
 		}

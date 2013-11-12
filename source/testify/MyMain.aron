@@ -1,15 +1,8 @@
 # ARON 0.1
 
-import testify.MyMain
-import testify.MainSearchForm
-import testify.MainResultsItem
+include Main.aron
 
-page:MyMain
-(
-	title "Testify"
-	searchForm MainSearchForm
-	(
-		q ""
-		start "0"
-	)
-)
+import testify.MainHandler
+
+@page.handler MainHandler
+# @page.metrics "found this many: %s"

@@ -248,6 +248,7 @@ public class PageGenerator
 				switch( form.type )
 				{
 					case "text":
+					case "hidden":
 					case "textarea":
 					{
 						println( "get" + form.id + "Form().set" + method + "( getRequestParameter( \"" + form.name + "\" )); " );

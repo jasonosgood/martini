@@ -1,6 +1,7 @@
 package martini.runtime;
 
 import java.io.File;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -25,49 +26,59 @@ public class
 		HashSet<String> loaded = new HashSet<String>();
 		
 		LineReader reader = new LineReader( dispatchFile );
-		System.out.printf( "loading dispatch.txt\n" );
-		for( String filename : reader )
+		System.out.println( "loading " + dispatchFile.toString() );
+		for( String pagearon : reader )
 		{
-			int x = filename.indexOf( '#' );
+			int x = pagearon.indexOf( '#' );
 			if( x > -1 )
 			{
-				filename = filename.substring( 0, x );
+				pagearon = pagearon.substring( 0, x );
 			}
-			filename = filename.replaceAll( "\\s+", " " );
-			filename = filename.trim();
-			if( filename.length() == 0 ) continue;
-			File file = new File( filename );
-			if( !file.exists() )
+			pagearon = pagearon.replaceAll( "\\s+", " " );
+			pagearon = pagearon.trim();
+			if( pagearon.length() == 0 ) continue;
+
+			if( loaded.contains( pagearon ))
 			{
-				System.out.printf( "cannot find page declaration file %s, skipping\n", filename );
+				System.out.printf( "page declaration file %s already loaded, skipping\n", pagearon );
 				continue;
 			}
-			if( !file.isFile() )
-			{
-				System.out.printf( "%s is not a file\n", filename );
-				continue;
-			}
-			if( !file.canRead() )
-			{
-				System.out.printf( "cannot read page declaration file %s, skipping\n", filename );
-				continue;
-			}
-			
-			if( loaded.contains( filename ))
-			{
-				System.out.printf( "page declaration file %s already loaded, skipping\n", filename );
-				continue;
-			}
-			
 			
 			ARONReader aron = new ARONReader();
-			LabelNode rootNode = aron.read( file );
+			LabelNode rootNode = null;
+			URL url = ClassLoader.getSystemClassLoader().getResource( pagearon );
+			if( url != null )
+			{
+				rootNode = aron.read( url );
+			}
+			else
+			{
+				File file = new File( pagearon );
+				if( !file.exists() )
+				{
+					System.out.printf( "cannot find page declaration file %s, skipping\n", pagearon );
+					continue;
+				}
+				if( !file.isFile() )
+				{
+					System.out.printf( "%s is not a file\n", pagearon );
+					continue;
+				}
+				if( !file.canRead() )
+				{
+					System.out.printf( "cannot read page declaration file %s, skipping\n", pagearon );
+					continue;
+				}
+			
+				rootNode = aron.read( file );
+			}
+				
 			if( rootNode != null )
 			{
 				Object temp = rootNode.find( "page" );
 				if( temp == null )
 				{
-					System.out.printf( "label 'page' not found in declaration file %s\n", filename );
+					System.out.printf( "label 'page' not found in declaration file %s\n", pagearon );
 					continue;
 				}
 				if( temp instanceof Page )
@@ -79,7 +90,7 @@ public class
 						if( p.getURI().equals( page.getURI() ))
 						{
 							unique = false;
-							System.out.printf( "cannot add page %s, page %s already uses uri %s\n", filename, page.getClass().getName(), page.getURI() );
+							System.out.printf( "cannot add page %s, page %s already uses uri %s\n", pagearon, page.getClass().getName(), page.getURI() );
 							break;
 						}
 					}
@@ -87,8 +98,8 @@ public class
 					if( unique )
 					{
 						pageList.add( page );
-						loaded.add( filename );
-						System.out.printf( "added page %s via uri %s\n", filename, page.getURI() );
+						loaded.add( pagearon );
+						System.out.printf( "added page %s via uri %s\n", pagearon, page.getURI() );
 					}
 				}
 			}

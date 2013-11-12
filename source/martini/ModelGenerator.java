@@ -39,7 +39,9 @@ public class ModelGenerator
 	{
 		
 		File sourceDir = new File( "./html" );
+//		File sourceDir = new File( "./html/testify" );
 //		File sourceDir = new File( "./demo/test" );
+//		File targetDir = new File( "./generated/java" );
 		File targetDir = new File( "./generated/java" );
 		Stack<String> path = new Stack<String>();
 		crawl( sourceDir, targetDir, path );

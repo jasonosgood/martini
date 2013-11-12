@@ -18,7 +18,17 @@ public abstract class
 extends 
 	HTMLBuilder
 {
-	public abstract String getURI();
+	private String _uri = "/";
+	
+	public void setURI( String uri )
+	{
+		_uri = uri;
+	}
+	
+	public String getURI() 
+	{ 
+		return _uri; 
+	}
 	
 	public abstract void setUrlParams( Map<String,String> params );
 	
@@ -58,11 +68,27 @@ extends
 	}
 	
 	
-	public void beforeHandle() throws Exception {}
+	// TODO: Is this generic type correct?
+	private Handler<Page> _handler = new Handler<Page>();
+	
+	public void setHandler( Handler<Page> handler )
+	{
+		if( handler == null )
+		{
+			handler = new Handler<Page>();
+		}
+		_handler = handler;
+		_handler.setPage( this );
+	}
+	
+	public Handler<Page> getHandler()
+	{
+		return _handler;
+	}
 	
 	private Map<String,String[]> _parameterMap = null;
 	
-	public void handle( HttpServletRequest request, HttpServletResponse response )
+	public void init( HttpServletRequest request, HttpServletResponse response )
 		throws ServletException, IOException
 	{
 		_request = request;
@@ -106,8 +132,6 @@ extends
 				//
 			}
 		}
-		
-		populateForm();
 	}
 	
 	public HashMap<String,String[]> extractMap( String payload )
@@ -137,8 +161,11 @@ extends
 			return null;
 		}
 	}
-	
-	public void afterHandle() throws Exception {}
+
+	public void handle( HttpServletRequest request, HttpServletResponse response )
+			throws ServletException, IOException {}
+
+//	public void afterHandle() throws Exception {}
 	
 	/**
 	 *  Generated subclass overrides template method this. Used to transfer URI's 
@@ -172,4 +199,15 @@ extends
 		return _id;
 	}
 	
+	private long _elapsed;
+	
+	public void setElapsed( long elapsed )
+	{
+		_elapsed = elapsed;
+	}
+	
+	public long getElapsed()
+	{
+		return _elapsed;
+	}
 }

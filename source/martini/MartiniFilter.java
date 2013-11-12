@@ -15,6 +15,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import martini.model.Handler;
 import martini.model.Page;
 import martini.runtime.RedirectException;
 import martini.runtime.Router;
@@ -90,10 +91,14 @@ implements
 				page._request = httpRequest;
 //			        char[] buffer = new char[request.getContentLength()];
 
-//				page.populateForm();
-				page.beforeHandle();
+				long start = System.currentTimeMillis();
+				page.init( httpRequest, httpResponse );
+				page.populateForm();
+				Handler handler = page.getHandler();
+				handler.setup();
 				page.handle( httpRequest, httpResponse );
-				page.afterHandle();
+				long elapsed = System.currentTimeMillis() - start;
+				page.setElapsed( elapsed );
 				done = true;
 			}
 			catch( RedirectException e )
@@ -125,6 +130,7 @@ implements
 				System.out.println();
 				System.out.println();
 				e.printStackTrace( System.out );
+				done = true;
 			}
 			finally
 			{
