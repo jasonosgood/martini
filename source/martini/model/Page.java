@@ -162,8 +162,10 @@ extends
 		}
 	}
 
-	public void handle( HttpServletRequest request, HttpServletResponse response )
-			throws ServletException, IOException {}
+//	public void render( HttpServletRequest request, HttpServletResponse response )
+//			throws ServletException, IOException {}
+
+	public abstract void render( HttpServletResponse response ) throws ServletException, IOException;
 
 //	public void afterHandle() throws Exception {}
 	

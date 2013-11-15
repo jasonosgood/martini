@@ -217,11 +217,12 @@ public class PageGenerator
 			println();
 		}
 		
-		println( "public void handle( HttpServletRequest request, HttpServletResponse response )" );
+//		println( "public void handle( HttpServletRequest request, HttpServletResponse response )" );
+		println( "public void render( HttpServletResponse response )" );
 		println( "\tthrows ServletException, IOException " );
 		println( "{" );
 		tabs++;
-		println( "super.handle( request, response );" );
+//		println( "super.handle( request, response );" );
 		println( "setXMLWriter( response.getWriter() );" );
 		println( "document();" );
 		

@@ -44,11 +44,11 @@ public class
 				continue;
 			}
 			
-			ARONReader aron = new ARONReader();
 			LabelNode rootNode = null;
 			URL url = ClassLoader.getSystemClassLoader().getResource( pagearon );
 			if( url != null )
 			{
+				ARONReader aron = new ARONReader();
 				rootNode = aron.read( url );
 			}
 			else
@@ -70,6 +70,7 @@ public class
 					continue;
 				}
 			
+				ARONReader aron = new ARONReader();
 				rootNode = aron.read( file );
 			}
 				

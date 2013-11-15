@@ -1,17 +1,13 @@
 package martini.runtime;
 
-import java.io.InputStream;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import java.net.URL;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.rits.cloning.Cloner;
-
+import martini.model.Handler;
 import martini.model.Page;
-
 import aron.ARONReader;
 import aron.LabelNode;
 
@@ -27,36 +23,36 @@ public class
 		Class<?> pageClass = Class.forName( name );
 		
 		String resource = pageClass.getName().replace( '.', '/' ).concat( ".aron" );
-		InputStream in = pageClass.getClassLoader().getResourceAsStream( resource );
-		if( in == null )
+		URL url = pageClass.getClassLoader().getResource( resource );
+		if( url == null )
 		{
 			throw new ServletException( "cannot find '" + resource + "'" );
 		}
 		
 		ARONReader aron = new ARONReader();
-		LabelNode rootNode = aron.read( in );
+		LabelNode rootNode = aron.read( url );
 		if( rootNode != null )
 		{
 			Object temp = rootNode.find( "page" );		
 			if( temp instanceof Page )
 			{
 				Page page = (Page) temp;
-				page.populateForm();
-				page.beforeHandle();
 				
 				HttpServletRequest request = new MockServletRequest();
 				HttpServletResponse response = new MockServletResponse();
 
-				page.handle( request, response );
-				page.afterHandle();
+				
+				long start = System.currentTimeMillis();
+				
+				page.init( request, response );
+				page.populateForm();
+				Handler handler = page.getHandler();
+				handler.setup();
+				page.render( response );
+				
+				long elapsed = System.currentTimeMillis() - start;
+				page.setElapsed( elapsed );
 
-//				Page model = (Page) temp;
-//				Page page = (Page)pageClass.newInstance();
-//				
-//				setter( page, model );
-//				page.setModel( model );
-//				HttpServletResponse response = new MockServletResponse();
-//				page.handle( null, response );
 			}
 		}
 	}

@@ -89,16 +89,17 @@ implements
 			try
 			{
 				page._request = httpRequest;
-//			        char[] buffer = new char[request.getContentLength()];
-
 				long start = System.currentTimeMillis();
+				
 				page.init( httpRequest, httpResponse );
 				page.populateForm();
 				Handler handler = page.getHandler();
 				handler.setup();
-				page.handle( httpRequest, httpResponse );
+				page.render( httpResponse );
+				
 				long elapsed = System.currentTimeMillis() - start;
 				page.setElapsed( elapsed );
+				
 				done = true;
 			}
 			catch( RedirectException e )
@@ -130,6 +131,7 @@ implements
 				System.out.println();
 				System.out.println();
 				e.printStackTrace( System.out );
+				
 				done = true;
 			}
 			finally
