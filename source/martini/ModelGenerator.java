@@ -7,7 +7,6 @@ import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -15,14 +14,10 @@ import java.util.Stack;
 
 import lox.Document;
 import lox.LOXHandler;
-import martini.model.Page;
 import martini.util.LineReader;
 
 import org.ccil.cowan.tagsoup.Parser;
 import org.xml.sax.InputSource;
-
-import aron.ARONReader;
-import aron.ARONWriter;
 
 public class ModelGenerator 
 {
@@ -39,13 +34,9 @@ public class ModelGenerator
 	{
 		
 		File sourceDir = new File( "./html" );
-//		File sourceDir = new File( "./html/testify" );
-//		File sourceDir = new File( "./demo/test" );
-//		File targetDir = new File( "./generated/java" );
-		File targetDir = new File( "./generated/java" );
+		File targetDir = new File( "./generated/html" );
 		Stack<String> path = new Stack<String>();
 		crawl( sourceDir, targetDir, path );
-		
 	}
 	
 	FileFilter htmlFilter = new FileFilter() 
@@ -93,7 +84,6 @@ public class ModelGenerator
 		return name;
 	}
 
-
 	// TODO: Create command line option for this? eg. for a clean build operation
 	private boolean _alwaysOverwrite = true;
 	
@@ -101,11 +91,13 @@ public class ModelGenerator
 	
 	public void crawl( File sourceRoot, File targetRoot, Stack<String> path )
 	{
-		targetRoot.mkdirs();
 		String pkg = join( path, "." );
 		File[] sourceList = sourceRoot.listFiles( htmlFilter );
 		for( File sourceFile : sourceList )
 		{
+			// Redundant, I know
+			targetRoot.mkdirs();
+			
 			try
 			{
 				// TODO: Sanity check filename suitable for class name
