@@ -3,6 +3,9 @@
 include Main.aron
 
 import testify.MainHandler
+mainhandler:MainHandler
+(
+	indexFile "/var/lib/legirati/lucene"
+)
 
-@page.handler MainHandler
-# @page.metrics "found this many: %s"
+@page.handler @mainhandler

@@ -5,7 +5,18 @@ include Bill.aron
 import testify.BillHandler
 import testify.MyBillContentsArticle
 import testify.BillStatusTable
+import martini.util.DB
 
-@page.handler BillHandler
+billhandler:BillHandler 
+(
+	db DB 
+	(
+		driver "org.h2.Driver"
+		url "jdbc:h2:/Users/jasonosgood/git/martini/db/testify"
+		username "sa"
+	)
+)
+
+@page.handler @billhandler
 @page.contentsArticle MyBillContentsArticle
 @page.statusTable BillStatusTable

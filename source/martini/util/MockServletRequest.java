@@ -1,4 +1,4 @@
-package martini.runtime;
+package martini.util;
 
 import java.io.BufferedReader;
 import java.io.IOException;

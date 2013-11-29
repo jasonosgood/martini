@@ -7,6 +7,7 @@ import java.util.List;
 
 import martini.model.Handler;
 import martini.runtime.RedirectException;
+import martini.util.DB;
 import testify.billsummary.LegDetailsSelect;
 import testify.billsummary.LegDetailsSelectResultSet;
 import testify.billsummary.SelectLegSponsorsByID;
@@ -19,20 +20,18 @@ public class
 extends 
 	Handler<Bill>
 {
-	static String driver = "org.h2.Driver";
-//	static String url = "jdbc:h2:tcp://localhost/~/firstreading";
-	static String url = "jdbc:h2:/Users/jasonosgood/git/martini/db/testify";
-	static String username = "sa";
-	static String password = "";
-
-	public static Connection getConnection()
-		throws SQLException, ClassNotFoundException
+	private DB _db = null;
+	
+	public void setDB( DB db )
 	{
-		Class.forName( driver );
-		Connection connection = DriverManager.getConnection( url, username, password );
-		return connection;
+		_db = db;
 	}
-
+	
+	public DB getDB()
+	{
+		return _db;
+	}
+	
 	@Override
 	public void setup()
 		throws Exception
@@ -46,7 +45,7 @@ extends
 		String desc = "long description";
 		int companion = 0;
 		
-		Connection connection = getConnection();
+		Connection connection = getDB().getConnection();
 		LegDetailsSelect details = new LegDetailsSelect();
 		details.setBiennium( biennium );
 		details.setBillNumber( billNumber );

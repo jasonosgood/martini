@@ -11,7 +11,7 @@ public class MartiniJetty
 		Server server = new Server( 8081 );
 		WebAppContext webapp = new WebAppContext();
 //		webapp.setServer( server );
-		webapp.setContextPath( "/school" );
+		webapp.setContextPath( "/" );
 		webapp.setWar( "webapp" );
 		server.setHandler( webapp );
 		server.start();
