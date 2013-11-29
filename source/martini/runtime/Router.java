@@ -1,6 +1,7 @@
 package martini.runtime;
 
 import java.io.File;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,7 +12,6 @@ import com.rits.cloning.Cloner;
 
 import aron.ARONReader;
 import aron.LabelNode;
-
 import martini.model.Page;
 import martini.util.LineReader;
 
@@ -19,14 +19,23 @@ public class
 	Router 
 {
 	ArrayList<Page> pageList = new ArrayList<Page>();
+
+	public void load( URL url )
+		throws Exception
+	{
+		System.out.println( "loading " + url.toString() );
+		InputStream in = url.openStream();
+		load( in );
+	}
 	
-	public void load( File dispatchFile )
+//	public void load( File dispatchFile )
+	public void load( InputStream in )
 		throws Exception
 	{
 		HashSet<String> loaded = new HashSet<String>();
 		
-		LineReader reader = new LineReader( dispatchFile );
-		System.out.println( "loading " + dispatchFile.toString() );
+		LineReader reader = new LineReader( in );
+//		System.out.println( "loading " + dispatchFile.toString() );
 		for( String pagearon : reader )
 		{
 			int x = pagearon.indexOf( '#' );
@@ -45,7 +54,7 @@ public class
 			}
 			
 			LabelNode rootNode = null;
-			URL url = ClassLoader.getSystemClassLoader().getResource( pagearon );
+			URL url = Thread.currentThread().getContextClassLoader().getResource( pagearon );
 			if( url != null )
 			{
 				ARONReader aron = new ARONReader();
@@ -86,12 +95,13 @@ public class
 				{
 					Page page = (Page) temp;
 					boolean unique = true;
-					for( Page p : pageList )
+					for( Page loadedPage : pageList )
 					{
-						if( p.getURI().equals( page.getURI() ))
+						if( loadedPage.getURI().equals( page.getURI() ))
 						{
 							unique = false;
-							System.out.printf( "cannot add page %s, page %s already uses uri %s\n", pagearon, page.getClass().getName(), page.getURI() );
+							String loadedPageName = loadedPage.getClass().getName().replace( '.', '/' );
+							System.out.printf( "cannot load page %s, page %s already uses uri \"%s\"\n", pagearon, loadedPageName, loadedPage.getURI() );
 							break;
 						}
 					}
@@ -100,7 +110,7 @@ public class
 					{
 						pageList.add( page );
 						loaded.add( pagearon );
-						System.out.printf( "added page %s via uri %s\n", pagearon, page.getURI() );
+						System.out.printf( "added route \"%s\" for page %s\n", page.getURI(), pagearon );
 					}
 				}
 			}

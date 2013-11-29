@@ -1,10 +1,8 @@
 package martini;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.Reader;
-import java.util.Map;
+import java.net.URL;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -30,10 +28,13 @@ implements
 //	public Flogger FILTER = null; 
 	Router router = null;
 
+	String contextPath = "";
+	
 	@Override
 	public void init( FilterConfig config )
 		throws ServletException
 	{
+		contextPath = config.getServletContext().getContextPath();
 //		FILTER = Flogger.newFlogger( this.getClass(), Subject.DEFAULT, Level.INFO ); 
 //		FILTER.getSubject().addAdapter( new ConsoleAdapter() );
 //		FILTER.log( "WhizzyFilter.init" );
@@ -41,12 +42,10 @@ implements
 		
 		router = new Router();
 		
-		
-//		dispatcher = new Dispatcher();
 		try 
 		{
-			File dispatchFile = new File( "html/pagelist.txt" );
-			router.load( dispatchFile );
+			URL url = Thread.currentThread().getContextClassLoader().getResource( "pagelist.txt" );
+			router.load( url );
 		} 
 		catch( Exception e ) 
 		{
@@ -63,6 +62,7 @@ implements
 		
 		String originalURI = httpRequest.getRequestURI();
 		String uri = originalURI;
+		uri = uri.substring( contextPath.length() );
 		
 		Page page = router.getPage( uri );
 		
@@ -93,7 +93,7 @@ implements
 				
 				page.init( httpRequest, httpResponse );
 				page.populateForm();
-				Handler handler = page.getHandler();
+				Handler	 handler = page.getHandler();
 				handler.setup();
 				page.render( httpResponse );
 				
