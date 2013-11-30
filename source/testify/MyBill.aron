@@ -7,6 +7,11 @@ import testify.MyBillContentsArticle
 import testify.BillStatusTable
 import martini.util.DB
 
+contents:MyBillContentsArticle
+(
+	root "/Users/jasonosgood/Desktop/testify-data/text/"
+)
+
 billhandler:BillHandler 
 (
 	db DB 
@@ -17,6 +22,10 @@ billhandler:BillHandler
 	)
 )
 
+
+
 @page.handler @billhandler
-@page.contentsArticle MyBillContentsArticle
+@page.contentsArticle @contents 
+
+# This clears the table
 @page.statusTable BillStatusTable
