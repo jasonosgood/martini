@@ -44,6 +44,7 @@ implements
 		
 		try 
 		{
+//			URL pop = Thread.currentThread().getContextClassLoader().getResource( "WEB-INF/web.xml" );
 			URL url = Thread.currentThread().getContextClassLoader().getResource( "pagelist.txt" );
 			router.load( url );
 		} 
@@ -93,8 +94,20 @@ implements
 				
 				page.init( httpRequest, httpResponse );
 				page.populateForm();
-				Handler	 handler = page.getHandler();
-				handler.setup();
+				Handler	handler = page.getHandler();
+				String method = httpRequest.getMethod();
+				switch( method )
+				{
+					case "GET":
+						handler.GET();
+						break;
+					case "POST":
+						handler.POST();
+						break;
+					default:
+						throw new Exception( "unsuppported HTTP method" );
+				}
+				
 				page.render( httpResponse );
 				
 				long elapsed = System.currentTimeMillis() - start;
