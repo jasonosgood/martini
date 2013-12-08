@@ -514,6 +514,7 @@ public class PageGenerator
 			switch( type )
 			{
 				case "text":
+				case "hidden":
 				{
 					if( "value".equalsIgnoreCase( key ))
 					{
