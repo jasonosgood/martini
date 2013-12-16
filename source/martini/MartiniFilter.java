@@ -12,6 +12,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import martini.model.Handler;
 import martini.model.Page;
@@ -58,8 +59,13 @@ implements
 	public void doFilter( ServletRequest request, ServletResponse response, FilterChain chain )
 		throws IOException, ServletException
 	{
+		
 		HttpServletRequest httpRequest = (HttpServletRequest) request;
 		HttpServletResponse httpResponse = (HttpServletResponse) response;
+		
+		HttpSession session = httpRequest.getSession( true );
+		boolean isNewSession = session.isNew();
+		
 		
 		String originalURI = httpRequest.getRequestURI();
 		String uri = originalURI;
