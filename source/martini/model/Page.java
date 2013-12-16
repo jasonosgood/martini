@@ -95,41 +95,45 @@ extends
 		_response = response;
 		
 		String method = getRequest().getMethod();
-		if( "GET".equals( method ))
+		switch( method )
 		{
-			Map<String,String[]> map = getRequest().getParameterMap();
-			if( map.size() > 0 )
+			case "GET":
 			{
-
-				_parameterMap = map;
+				Map<String,String[]> map = getRequest().getParameterMap();
+				if( map.size() > 0 )
+				{
+					_parameterMap = map;
+				}
+				break;
 			}
-		}
-		else if( "POST".equals( method ))
-		{
-			try
+			case "POST":
 			{
-				Reader reader = null;
-				StringBuilder sb = new StringBuilder();
 				try
 				{
-					reader = getRequest().getReader();
-					int n;
-					while ((n = reader.read()) != -1 )
+					Reader reader = null;
+					StringBuilder sb = new StringBuilder();
+					try
 					{
-						sb.append( (char) n ); 
+						reader = getRequest().getReader();
+						int n;
+						while ((n = reader.read()) != -1 )
+						{
+							sb.append( (char) n ); 
+						}
+						_parameterMap = extractMap( sb.toString() );
 					}
-					_parameterMap = extractMap( sb.toString() );
+					finally
+					{
+						reader.close();
+						System.out.println( sb.toString() );
+						System.out.println(" -- ");
+					}
 				}
-				finally
+				catch( Exception e )
 				{
-					reader.close();
-					System.out.println( sb.toString() );
-					System.out.println(" -- ");
+					//
 				}
-			}
-			catch( Exception e )
-			{
-				//
+				break;
 			}
 		}
 	}
