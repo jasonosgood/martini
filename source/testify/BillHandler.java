@@ -33,11 +33,10 @@ extends
 	}
 	
 	@Override
-	public void setup()
+	public void GET( Bill page )
 		throws Exception
 	{
 		int legislationID = 0;
-		Bill page = getPage();
 		String biennium = page.getBienniumParam();
 		String billID = "HB 0000";
 		int billNumber = Integer.valueOf( page.getBillNumberParam() );
@@ -63,7 +62,7 @@ extends
 			BillNotFound billNotFound = new BillNotFound();
 			billNotFound.setBiennium( biennium );
 			billNotFound.setBillID( billNumber );
-			throw new RedirectException( billNotFound );
+			throw new RedirectException( billNotFound.getURI() );
 		}
 		rsDetails.close();
 		

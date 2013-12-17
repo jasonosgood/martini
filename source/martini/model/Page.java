@@ -67,7 +67,6 @@ extends
 		return _response;
 	}
 	
-	
 	// TODO: Is this generic type correct?
 	private Handler<Page> _handler = new Handler<Page>();
 	
@@ -78,7 +77,7 @@ extends
 			handler = new Handler<Page>();
 		}
 		_handler = handler;
-		_handler.setPage( this );
+//		_handler.setPage( this );
 	}
 	
 	public Handler<Page> getHandler()
@@ -166,13 +165,8 @@ extends
 		}
 	}
 
-//	public void render( HttpServletRequest request, HttpServletResponse response )
-//			throws ServletException, IOException {}
-
 	public abstract void render( HttpServletResponse response ) throws ServletException, IOException;
 
-//	public void afterHandle() throws Exception {}
-	
 	/**
 	 *  Generated subclass overrides template method this. Used to transfer URI's 
 	 *  query parameters to the Page instance.

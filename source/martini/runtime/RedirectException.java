@@ -1,16 +1,31 @@
 package martini.runtime;
 
-import martini.model.Page;
+import javax.servlet.http.HttpServletResponse;
+
 
 public class 
 	RedirectException 
 extends 
 	Exception 
 {
-	public Page page;
+	private static final long serialVersionUID = 1L;
 	
-	public RedirectException( Page p )
+	private int _code = HttpServletResponse.SC_FOUND;
+	
+	public int getCode() { return _code; }
+	
+	private String _location;
+	
+	public String getLocation() { return _location; }
+	
+	public RedirectException( String location )
 	{
-		page = p;
-	}	
+		_location = location;
+	}
+	
+	public RedirectException( int status, String location )
+	{
+		_code = status;
+		_location = location;
+	}
 }

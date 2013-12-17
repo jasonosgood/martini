@@ -47,7 +47,7 @@ public class
 				page.init( request, response );
 				page.populateForm();
 				Handler handler = page.getHandler();
-				handler.setup();
+				handler.GET( page );
 				page.render( response );
 				
 				long elapsed = System.currentTimeMillis() - start;
