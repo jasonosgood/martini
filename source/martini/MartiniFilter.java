@@ -45,7 +45,6 @@ implements
 		
 		try 
 		{
-//			URL pop = Thread.currentThread().getContextClassLoader().getResource( "WEB-INF/web.xml" );
 			URL url = Thread.currentThread().getContextClassLoader().getResource( "pagelist.txt" );
 			router.load( url );
 		} 
@@ -86,12 +85,12 @@ implements
 		
 		httpResponse.setContentType( "text/html" ); // WTF? Why this one?
 		
-		httpResponse.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); // HTTP 1.1.
-		httpResponse.setHeader("Pragma", "no-cache"); // HTTP 1.0.
-		httpResponse.setDateHeader("Expires", 0); // Proxies.
+		httpResponse.setHeader( "Cache-Control", "no-cache, no-store, must-revalidate" ); // HTTP 1.1.
+		httpResponse.setHeader( "Pragma", "no-cache" ); // HTTP 1.0.
+		httpResponse.setDateHeader( "Expires", 0 ); // Proxies.
 		
-		boolean done = false;
-		while( !done )
+//		boolean done = false;
+//		while( !done )
 		{
 			try
 			{
@@ -100,15 +99,15 @@ implements
 				
 				page.init( httpRequest, httpResponse );
 				page.populateForm();
-				Handler	handler = page.getHandler();
+				Handler<Page> handler = page.getHandler();
 				String method = httpRequest.getMethod();
 				switch( method )
 				{
 					case "GET":
-						handler.GET();
+						handler.GET( page );
 						break;
 					case "POST":
-						handler.POST();
+						handler.POST( page );
 						break;
 					default:
 						throw new Exception( "unsuppported HTTP method" );
@@ -119,11 +118,19 @@ implements
 				long elapsed = System.currentTimeMillis() - start;
 				page.setElapsed( elapsed );
 				
-				done = true;
+//				done = true;
 			}
 			catch( RedirectException e )
 			{
-				page = e.page;
+				int code = e.getCode();
+				if( code > 299 && code < 400 )
+				{
+					httpResponse.setStatus( code );
+					String location = e.getLocation();
+					location = httpResponse.encodeRedirectURL( location );
+					httpResponse.addHeader( "Location", location );
+				}
+//				done = true;
 			}
 			catch( Exception e )
 			{
@@ -151,7 +158,7 @@ implements
 				System.out.println();
 				e.printStackTrace( System.out );
 				
-				done = true;
+//				done = true;
 			}
 			finally
 			{

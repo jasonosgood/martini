@@ -250,6 +250,7 @@ public class PageGenerator
 				{
 					case "text":
 					case "hidden":
+					case "password":
 					case "textarea":
 					{
 						println( "get" + form.id + "Form().set" + method + "( getRequestParameter( \"" + form.name + "\" )); " );
@@ -515,6 +516,8 @@ public class PageGenerator
 			{
 				case "text":
 				case "hidden":
+				case "password":
+				case "textarea":
 				{
 					if( "value".equalsIgnoreCase( key ))
 					{

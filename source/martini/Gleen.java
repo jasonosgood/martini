@@ -170,15 +170,29 @@ public class
 					{
 						case "text":
 						case "hidden":
+						case "password":
 						{
 							String value = child.getAttributeValue( "value" );
-							_builder.addTextInput( type, name, value );
+							if( name == null )
+							{
+								System.out.println( "ignoring <input>, missing \"name\" attribute\n" + child.toString() );
+							}
+//							else 
+								if( value == null )
+							{
+								System.out.println( "ignoring <input>, missing \"value\" attribute\n" + child.toString() );
+							}
+//							else
+							{
+								_builder.addTextInput( type, name, value );
+							}
+							
 							break;
 						}
 						case "checkbox":
 						{
-							boolean value = child.hasAttribute( "checked" );
-							_builder.addBooleanInput( type, name, value );
+							boolean checked = child.hasAttribute( "checked" );
+							_builder.addBooleanInput( type, name, checked );
 							break;
 						}
 						case "submit":
@@ -197,18 +211,21 @@ public class
 					String name = child.getAttributeValue( "name" );
 					if( name == null )
 					{
-						System.out.println( "ignoring select\n" + child.toString() );
+						System.out.println( "ignoring <select>, missing \"name\" attribute\n" + child.toString() );
 					}
-					_builder.addSelect( name );
-					for( Element option : child.find( "option" ))
+					else
 					{
-						String text = option.getText();
-						String value = option.getAttributeValue( "value" );
-						boolean selected = option.hasAttribute( "selected" );
-						_builder.addOption( value, text, selected );
+						_builder.addSelect( name );
+						for( Element option : child.find( "option" ))
+						{
+							String text = option.getText();
+							String value = option.getAttributeValue( "value" );
+							boolean selected = option.hasAttribute( "selected" );
+							_builder.addOption( value, text, selected );
+						}
+						
+						removeAllButFirst( child, "option" );
 					}
-					
-					removeAllButFirst( child, "option" );
 					continue;
 				}
 				
@@ -217,14 +234,17 @@ public class
 					String name = child.getAttributeValue( "name" );
 					if( name == null )
 					{
-						System.out.println( "ignoring textarea\n" + child.toString() );
+						System.out.println( "ignoring <textarea>, missing \"name\" attribute\n" + child.toString() );
 					}
-					StringBuilder sb = new StringBuilder();
-					for( Content y : child )
+					else
 					{
-						sb.append( y.toString() );
+						StringBuilder sb = new StringBuilder();
+						for( Content y : child )
+						{
+							sb.append( y.toString() );
+						}
+						_builder.addTextarea( name, sb.toString() );
 					}
-					_builder.addTextarea( name, sb.toString() );
 					continue;
 				}
 				
