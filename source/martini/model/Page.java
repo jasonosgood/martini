@@ -10,6 +10,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import aron.ARONWriter;
 import martini.HTMLBuilder;
 
 
@@ -32,39 +33,19 @@ extends
 	
 	public abstract void setUrlParams( Map<String,String> params );
 	
-	public HttpServletRequest _request = null;
-	
-	public HttpServletRequest getRequest() 
-	{
-		return _request;
-	}
-	
-	public boolean hasParameters()
-	{
-		return _parameterMap != null;
-	}
-	
-	public String getRequestParameter( String key )
+	public String getRequestParameter( Map<String,String[]> map, String key )
 	{
 		String result = "";
-		if( hasParameters() && _parameterMap.containsKey( key ))
+		if( map.containsKey( key ))
 		{
-			result = _parameterMap.get( key )[0];
+			result = map.get( key )[0];
 		}
-		if( getRequest() == null ) return result;
 		return result;
 	}
-	
-	public boolean hasRequestParameter( String key )
+
+	public boolean hasRequestParameter( Map<String,String[]> map, String key )
 	{
-		return hasParameters() && _parameterMap.containsKey( key );
-	}
-	
-	public HttpServletResponse _response = null;
-	
-	public HttpServletResponse getResponse()
-	{
-		return _response;
+		return map.containsKey( key );
 	}
 	
 	// TODO: Is this generic type correct?
@@ -77,7 +58,6 @@ extends
 			handler = new Handler<Page>();
 		}
 		_handler = handler;
-//		_handler.setPage( this );
 	}
 	
 	public Handler<Page> getHandler()
@@ -85,23 +65,20 @@ extends
 		return _handler;
 	}
 	
-	private Map<String,String[]> _parameterMap = null;
-	
-	public void init( HttpServletRequest request, HttpServletResponse response )
+	public Map<String,String[]> init( HttpServletRequest request, HttpServletResponse response )
 		throws ServletException, IOException
 	{
-		_request = request;
-		_response = response;
+		Map<String,String[]> result = null;
 		
-		String method = getRequest().getMethod();
+		String method = request.getMethod();
 		switch( method )
 		{
 			case "GET":
 			{
-				Map<String,String[]> map = getRequest().getParameterMap();
+				Map<String,String[]> map = request.getParameterMap();
 				if( map.size() > 0 )
 				{
-					_parameterMap = map;
+					result = map;
 				}
 				break;
 			}
@@ -113,13 +90,13 @@ extends
 					StringBuilder sb = new StringBuilder();
 					try
 					{
-						reader = getRequest().getReader();
+						reader = request.getReader();
 						int n;
 						while ((n = reader.read()) != -1 )
 						{
 							sb.append( (char) n ); 
 						}
-						_parameterMap = extractMap( sb.toString() );
+						result = extractMap( sb.toString() );
 					}
 					finally
 					{
@@ -135,6 +112,7 @@ extends
 				break;
 			}
 		}
+		return result;
 	}
 	
 	public HashMap<String,String[]> extractMap( String payload )
@@ -171,7 +149,7 @@ extends
 	 *  Generated subclass overrides template method this. Used to transfer URI's 
 	 *  query parameters to the Page instance.
 	 */
-	public abstract void populateForm();
+	public abstract void populateForm( Map<String,String[]> params );
 
 	// Every HTML page has a title. 
 	private String _title = null;
@@ -199,7 +177,7 @@ extends
 		return _id;
 	}
 	
-	private long _elapsed;
+	private long _elapsed = -0L;
 	
 	public void setElapsed( long elapsed )
 	{
@@ -210,4 +188,20 @@ extends
 	{
 		return _elapsed;
 	}
+	
+//	public String toString()
+//	{
+//		StringBuilder sb = new StringBuilder();
+//		sb.append( "uri: " );
+//		sb.append( getURI() );
+//		sb.append( "\nid: " );
+//		sb.append( getID() );
+//		sb.append( "\ntitle: " );
+//		sb.append( getTitle() );
+//		
+//		toString( sb );
+//		return sb.toString();
+//	}
+//
+//	public abstract String toString( StringBuilder sb );
 }

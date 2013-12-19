@@ -5,6 +5,9 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import martini.model.Handler;
 import martini.runtime.RedirectException;
 import martini.util.DB;
@@ -33,7 +36,7 @@ extends
 	}
 	
 	@Override
-	public void GET( Bill page )
+	public void GET( Bill page, HttpServletRequest request, HttpServletResponse response )
 		throws Exception
 	{
 		int legislationID = 0;

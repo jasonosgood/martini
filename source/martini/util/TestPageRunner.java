@@ -1,6 +1,7 @@
 package martini.util;
 
 import java.net.URL;
+import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -44,10 +45,13 @@ public class
 				
 				long start = System.currentTimeMillis();
 				
-				page.init( request, response );
-				page.populateForm();
+				Map<String,String[]> params = page.init( request, response );
+				if( params != null && params.size() > 0 )
+				{
+					page.populateForm( params );
+				}
 				Handler handler = page.getHandler();
-				handler.GET( page );
+				handler.GET( page, request, response );
 				page.render( response );
 				
 				long elapsed = System.currentTimeMillis() - start;
@@ -56,28 +60,4 @@ public class
 			}
 		}
 	}
-
-//	public static void setter( Page page, Model model ) 
-//		throws IllegalArgumentException, IllegalAccessException, InvocationTargetException, NoSuchMethodException
-//	{
-//		for( Method method : page.getClass().getMethods() )
-//		{
-//			if( method.getName().equals( "setModel" ))
-//			{
-//				for( Class<?> oof : method.getParameterTypes() )
-//				{
-//					if( oof.isAssignableFrom( model.getClass() ) )
-//					{
-//						Object result = method.invoke( page, model );
-//						return;
-//					}
-//					break;
-//				}
-//			}
-//		}
-//		
-//		throw new NoSuchMethodException( page.getClass().getName() + ".setModel(" + model.getClass().getName() + ")" );
-//	}
-
-
 }

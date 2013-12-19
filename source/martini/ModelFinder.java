@@ -1,7 +1,7 @@
 package martini;
 
-import static martini.Gleen.getMartiniID;
-import static martini.Gleen.getMartiniOptional;
+import static martini.ModelFinder.getMartiniID;
+import static martini.ModelFinder.getMartiniOptional;
 import static martini.util.Util.firstCharUpper;
 
 import java.io.File;
@@ -20,12 +20,12 @@ import lox.Text;
 // TODO Logging for found matches, to add with usage/debugging
 
 public class 
-	Gleen 
+	ModelFinder 
 {
 	public static void main( String[] args )
 		throws Exception
 	{
-		Gleen gleen = new Gleen();
+		ModelFinder gleen = new ModelFinder();
 		gleen.go();
 	}
 	

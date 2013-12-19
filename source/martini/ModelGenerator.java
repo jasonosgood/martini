@@ -117,7 +117,7 @@ public class ModelGenerator
 					tagsoup.parse( inputSource );
 					Document doc = handler.getDocument();
 					
-					Gleen gleen = new Gleen();
+					ModelFinder gleen = new ModelFinder();
 					gleen.go( doc );
 					ModelBuilder builder = gleen._builder; 
 					

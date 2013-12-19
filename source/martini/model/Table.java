@@ -9,17 +9,17 @@ public class
 implements
 	Iterable<R>
 {
-	private P _page = null;
-	
-	public void setPage( P page )
-	{
-		_page = page;
-	}
-	
-	public P getPage()
-	{
-		return _page;
-	}
+//	private P _page = null;
+//	
+//	public void setPage( P page )
+//	{
+//		_page = page;
+//	}
+//	
+//	public P getPage()
+//	{
+//		return _page;
+//	}
 
 	private H _header = null;
 	

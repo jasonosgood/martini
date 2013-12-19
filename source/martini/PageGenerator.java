@@ -19,13 +19,12 @@ import lox.ProcessingInstruction;
 import lox.Stack;
 import lox.Text;
 import lox.Whitespace;
-
 import static martini.util.Util.firstCharLower;
 import static martini.util.Util.firstCharUpper;
 import static martini.util.Util.hasText;
 import static martini.util.Util.escape;
-import static martini.Gleen.getMartiniID;
-import static martini.Gleen.getMartiniOptional;
+import static martini.ModelFinder.getMartiniID;
+import static martini.ModelFinder.getMartiniOptional;
 
 
 public class PageGenerator 
@@ -83,14 +82,14 @@ public class PageGenerator
 		println( "// Generated from " + sourceFileName + " -- DO NOT MODIFY" );
 		println();
 		println( "import martini.model.Page;" );
-		println( "import martini.HTMLBuilder;" );
+//		println( "import martini.HTMLBuilder;" );
 		println( "import martini.model.*;" );
 		println( "import static martini.util.Util.hasText;" );
 		println( "import java.util.List;" );
 		println( "import java.util.ArrayList;" );
 		println( "import java.util.Map;" );
 		println( "import javax.servlet.ServletException;" );
-		println( "import javax.servlet.http.HttpServletRequest;" );
+//		println( "import javax.servlet.http.HttpServletRequest;" );
 		println( "import javax.servlet.http.HttpServletResponse;" );
 		println( "import java.io.IOException;" );
 		println();
@@ -157,7 +156,7 @@ public class PageGenerator
 			printf( "	public %s get%s() { return _%s; }", clazz, accessor, variable );
 			printf( "	public void set%s( %s %s ) {", accessor, clazz, variable );
 			printf( "		_%s = %s;", variable, variable );
-			printf( "		_%s.setPage( this );", variable );
+//			printf( "		_%s.setPage( this );", variable );
 			printf( "	}" );
 			println();
 		}
@@ -169,12 +168,12 @@ public class PageGenerator
 			String clazz = _className + id;
 			String accessor = id;
 			String variable = firstCharLower( id );
-			printf( "	private %s _%s = null;", clazz, variable );
-			printf( "	public %s get%s() { return _%s; }", clazz, accessor, variable );
-			printf( "	public void set%s( %s %s ) {", accessor, clazz, variable );
-			printf( "		_%s = %s;", variable, variable );
-			printf( "		_%s.setPage( this );", variable );
-			printf( "	}" );
+			printf( "private %s _%s = null;", clazz, variable );
+			printf( "public %s get%s() { return _%s; }", clazz, accessor, variable );
+			printf( "public void set%s( %s %s ) {", accessor, clazz, variable );
+			printf( "	_%s = %s;", variable, variable );
+//			printf( "	_%s.setPage( this );", variable );
+			printf( "}" );
 			println();
 		}
 		
@@ -202,7 +201,7 @@ public class PageGenerator
 			printf( "	public %s get%s() { return _%s; }", clazz, accessor, variable );
 			printf( "	public void set%s( %s %s ) {", accessor, clazz, variable );
 			printf( "		_%s = %s;", variable, variable );
-			printf( "		_%s.setPage( this );", variable );
+//			printf( "		_%s.setPage( this );", variable );
 			printf( "	}" );
 			println();
 		}
@@ -237,10 +236,9 @@ public class PageGenerator
 		println( "}" );
 		
 		println( "@Override");
-		println( "public void populateForm()" );
+		println( "public void populateForm( Map<String,String[]> params )" );
 		println( "{" );
 		tabs++;
-		println( "if( !hasParameters() ) return;" );
 		if( !_formList.isEmpty() )
 		{
 			for( Form form : _formList ) 
@@ -253,18 +251,18 @@ public class PageGenerator
 					case "password":
 					case "textarea":
 					{
-						println( "get" + form.id + "Form().set" + method + "( getRequestParameter( \"" + form.name + "\" )); " );
+						println( "get" + form.id + "Form().set" + method + "( getRequestParameter( params, \"" + form.name + "\" )); " );
 						break;
 					}
 					case "checkbox":
 					case "radio":
 					{
-						println( "get" + form.id + "Form().set" + method + "( hasRequestParameter( \"" + form.name + "\" )); " );
+						println( "get" + form.id + "Form().set" + method + "( hasRequestParameter( params, \"" + form.name + "\" )); " );
 						break;
 					}
 					case "select":
 					{
-						println( "get" + form.id + "Form().get" + method + "().setValue( getRequestParameter( \"" + form.name + "\" )); " );
+						println( "get" + form.id + "Form().get" + method + "().setValue( getRequestParameter( params, \"" + form.name + "\" )); " );
 						break;
 					}
 					default:
@@ -274,6 +272,19 @@ public class PageGenerator
 		}
 		tabs--;
 		println( "}" );
+		
+//		println( "public String toString( StringBuilder sb )" );
+//		println( "{" );
+//		tabs++;
+//		for( String param : _builder.urlParamList )
+//		{
+//			String title = firstCharLower( param );
+//			String accessor = firstCharUpper( param );
+//			printf( "sb.append( \"\\n%s: \" );", title );
+//			printf( "sb.append( get%s() );", accessor );
+//		}
+//		tabs--;
+//		println( "}" );
 		
 		tabs--;
 		println( "}" );
