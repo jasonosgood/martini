@@ -82,7 +82,7 @@ public class PageGenerator
 		println( "// Generated from " + sourceFileName + " -- DO NOT MODIFY" );
 		println();
 		println( "import martini.model.Page;" );
-//		println( "import martini.HTMLBuilder;" );
+		println( "import martini.HTMLBuilder;" );
 		println( "import martini.model.*;" );
 		println( "import static martini.util.Util.hasText;" );
 		println( "import java.util.List;" );

@@ -93,6 +93,7 @@ public class ModelGenerator
 	{
 		String pkg = join( path, "." );
 		File[] sourceList = sourceRoot.listFiles( htmlFilter );
+		if( sourceList == null ) return;
 		for( File sourceFile : sourceList )
 		{
 			// Redundant, I know
