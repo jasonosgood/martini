@@ -23,7 +23,7 @@ public class
 	public void load( URL url )
 		throws Exception
 	{
-		System.out.println( "loading " + url.toString() );
+		System.out.println( "Router loading " + url.toString() );
 		InputStream in = url.openStream();
 		load( in );
 	}
