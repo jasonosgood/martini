@@ -19,16 +19,16 @@ public abstract class
 extends 
 	HTMLBuilder
 {
-	private String _uri = "/";
-	
-	public void setURI( String uri )
-	{
-		_uri = uri;
-	}
+//	private String _uri = "/";
+//	
+//	public void setURI( String uri )
+//	{
+//		_uri = uri;
+//	}
 	
 	public String getURI() 
 	{ 
-		return _uri; 
+		return "/" + this.getClass().getCanonicalName().toString(); 
 	}
 	
 	public abstract void setUrlParams( Map<String,String> params );

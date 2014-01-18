@@ -98,9 +98,12 @@ public class PageGenerator
 		println();
 		tabs++;
 		
-		printf( "@Override" );
-		printf( "public String getURI() { return \"%s\"; };", _builder.uri  );
-		println();
+		if( _builder.uri != null )
+		{
+			printf( "@Override" );
+			printf( "public String getURI() { return \"%s\"; };", _builder.uri  );
+			println();
+		}
 		
 		for( String param : _builder.urlParamList )
 		{
