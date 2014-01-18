@@ -28,59 +28,57 @@ public class
 		File target = new File( targetDir, page + ".aron" );
 		PrintWriter pw = new PrintWriter( target );
 		
-		pw.println( "# ARON 0.1" );
-		pw.println();
+		println( pw, "# ARON 0.1" );
+		println( pw );
 		
-		pw.printf( "import %s.%s\n", pkg, page );
+		printf( pw, "import %s.%s", pkg, page );
 		
 		for( ModelBuilder.Article article : builder.articleList )
 		{
 			String articleName = page + article.id;
-			pw.printf( "import %s.%sArticle\n", pkg, articleName );
+			printf( pw, "import %s.%sArticle", pkg, articleName );
 		}
 		
 		for( ModelBuilder.Table table : builder.tableList )
 		{
 			String tableName = page + table.id;
-			pw.printf( "import %s.%sTable\n", pkg, tableName );
+			printf( pw, "import %s.%sTable", pkg, tableName );
 			if( table.header != null )
 			{
-				pw.printf( "import %s.%sTableHeader\n", pkg, tableName );
+				printf( pw, "import %s.%sTableHeader", pkg, tableName );
 			}
-			pw.printf( "import %s.%sTableRow\n", pkg, tableName );
+			printf( pw, "import %s.%sTableRow", pkg, tableName );
 		}
 		
 		for( ModelBuilder.Form form : builder.formList )
 		{
 			String formName = page + form.id;
-			pw.printf( "import %s.%sForm\n", pkg, formName );
+			printf( pw, "import %s.%sForm", pkg, formName );
 			if( !form.selectList.isEmpty() )
 			{
-				pw.printf( "import martini.model.Select\n" );
-				pw.printf( "import martini.model.Option\n" );
+				printf( pw, "import martini.model.Select" );
+				printf( pw, "import martini.model.Option" );
 			}
 		}
 		
-		for( ModelBuilder.List list : builder.listList )
+		for( ModelBuilder.List list : builder.rootList.children )
 		{
-			String listName = page + list.id;
-			pw.printf( "import %s.%sItem\n", pkg, listName );
-			
+			listImport( pkg, page, pw, list );
 		}
 		
 		pw.println();
 
-		pw.printf( "page:%s\n", page );
-		pw.printf( "(\n" );
+		printf( pw, "page:%s", page );
+		printParenLeft( pw );
 		
 		if( builder.title != null )
 		{
-			pw.printf( "\ttitle \"%s\"\n", builder.title );
+			printf( pw, "title \"%s\"", builder.title );
 		}
 		
 		for( ModelBuilder.Property property : builder.propertyList )
 		{
-			pw.printf( "\t%s \"%s\"\n", property.id, property.text );
+			printf( pw, "%s \"%s\"", property.id, property.text );
 		}
 
 		for( ModelBuilder.Article article : builder.articleList )
@@ -88,47 +86,48 @@ public class
 			String articleCls = page + article.id + "Article";
 			String articleProp = firstCharLower( article.id ) + "Article";
 			// TODO: ARON requires parens like "prop Class ()", fix that 
-			pw.printf( "\t%s %s ()\n", articleProp, articleCls );
+			printf( pw, "%s %s ()", articleProp, articleCls );
 		}
 		
 		for( ModelBuilder.Table table : builder.tableList )
 		{
 			String tableCls = page + table.id + "Table";
 			String tableProp = firstCharLower( table.id ) + "Table";
-			pw.printf( "\t%s %s\n", tableProp, tableCls );
-			pw.printf( "\t(\n" );
+			printf( pw, "%s %s", tableProp, tableCls );
+			printParenLeft( pw );
 	
 			if( table.header != null )
 			{
 				String headerCls = tableCls + "Header";
-				pw.printf( "\t\theader %s ()\n", headerCls );
+				printf( pw, "header %s ()", headerCls );
 			}
 			
-			pw.printf( "\t\trowList [\n" );
+			printf( pw, "rowList [" );
+
 			for( Row row : table.body.rowList )
 			{
 				String rowCls = tableCls + "Row";
-				pw.printf( "\t\t\t%s\n", rowCls );
-				pw.printf( "\t\t\t(\n" );
+				printf( pw, rowCls );
+				printParenLeft( pw );
 				for( Cell cell : row.cellList )
 				{
 					String key = firstCharLower( cell.id );
 					if( cell.value == null ) cell.value = ""; 
-					pw.printf( "\t\t\t\t%s \"%s\"\n", key, cell.value.trim() );
+					printf( pw, "%s \"%s\"", key, cell.value.trim() );
 				}
-				pw.printf( "\t\t\t)\n" );
+				printParenRight( pw );
 			}
 			
-			pw.printf( "\t\t]\n" );
-			pw.printf( "\t)\n" );
+			printBracketRight( pw );
+			printParenRight( pw );
 		}
 		
 		for( ModelBuilder.Form form : builder.formList )
 		{
 			String tableCls = page + form.id + "Form";
 			String tableProp = firstCharLower( form.id ) + "Form";
-			pw.printf( "\t%s %s\n", tableProp, tableCls );
-			pw.printf( "\t(\n" );
+			printf( pw, "%s %s", tableProp, tableCls );
+			printParenLeft( pw );
 			for( ModelBuilder.Input input : form.inputList )
 			{
 				String key = firstCharLower( input.name );
@@ -137,41 +136,41 @@ public class
 					TextInput text = (TextInput) input;
 					String value = text.value;
 					if( value == null ) value = "";
-					pw.printf( "\t\t%s \"%s\"\n", key, value.trim() );
+					printf( pw, "%s \"%s\"", key, value.trim() );
 				}
 				else
 				if( input instanceof BooleanInput )
 				{
 					BooleanInput temp = (BooleanInput) input;
-					pw.printf( "\t\t%s %s\n", key, temp.value );
+					printf( pw, "%s %s", key, temp.value );
 				}
 			}
 	
 			for( ModelBuilder.Select select : form.selectList )
 			{
 				String selectProp = firstCharLower( select.name );
-				pw.printf( "\t\t%s \n", selectProp );
-				pw.printf( "\t\t[\n" );
+				printf( pw, selectProp );
+				printBracketLeft( pw );
 				for( ModelBuilder.Option option : select.optionList )
 				{
-					pw.printf( "\t\t\tOption\n" );
-					pw.printf( "\t\t\t(\n" );
+					printf( pw, "Option" );
+					printParenLeft( pw );
 					if( option.value != null )
 					{
 						String value = firstCharLower( option.value );
-						pw.printf( "\t\t\t\tvalue \"%s\"\n", value );
+						printf( pw, "value \"%s\"", value );
 					}
 					String text = option.text;
 					if( text == null ) text = "";
-					pw.printf( "\t\t\t\ttext \"%s\"\n", text.trim() );
+					printf( pw, "text \"%s\"", text.trim() );
 					
 					if( option.selected )
 					{
-						pw.printf( "\t\t\t\tselected true\n" );
+						printf( pw, "selected true" );
 					}
-					pw.printf( "\t\t\t)\n" );
+					printParenRight( pw );
 				}
-				pw.printf( "\t\t]\n" );
+				printBracketRight( pw );
 			}
 	
 			for( Textarea textarea : form.textareaList )
@@ -181,46 +180,152 @@ public class
 				if( value == null ) value = "";
 				// Literal text, do not trim textarea values
 				value = escape( value );
-				pw.printf( "\t\t%s \"%s\"\n", key, value );
+				printf( pw, "%s \"%s\"", key, value );
 			}
 	
-			pw.printf( "\t)\n" );
+			printParenRight( pw );
 		}
 		
-		for( ModelBuilder.List list : builder.listList )
+		for( ModelBuilder.List list : builder.rootList.children )
 		{
-			String listCls = page + list.id;
-			String itemCls = listCls + "Item";
-			String listProp = firstCharLower( list.id );
-			pw.printf( "\t%s\n", listProp );
-			pw.printf( "\t[\n" );
-			for( ListItem item : list.itemList )
-			{
-				pw.printf( "\t\t%s\n", itemCls );
-				pw.printf( "\t\t(\n" );
-				for( ListItemParameter param : item.paramList )
-				{
-					String key = firstCharLower( param.id );
-					pw.printf( "\t\t\t%s \"%s\"\n", key, param.text.trim() );
-					if( param.kind == ModelBuilder.ListItemParameter.Kind.A && param.href != null )
-					{
-						pw.printf( "\t\t\t%s \"%s\"\n", key + "Href", param.href );
-					}
-				}
-				if( item.text != null )
-				{
-					pw.printf( "\t\t\ttext \"%s\"\n", item.text.trim() );
-					
-				}
-				pw.printf( "\t\t)\n" );
-			}
-			pw.printf( "\t]\n" );
-			
-			
+			listData( page, pw, list );
 		}
 		
-		pw.printf( ")\n" );
+		printParenRight( pw );
 		pw.close();
 	}
+	
+	public void listImport( String pkg, String page, PrintWriter pw, ModelBuilder.List parent )
+		throws IOException
+	{
+		String listName = page + parent.id;
+		printf( pw, "import %s.%sItem", pkg, listName );
+		
+		for( ModelBuilder.List child : parent.children )
+		{
+			listImport( pkg, page, pw, child );
+			break;
+		}
+	}
 
+	public void listData( String page, PrintWriter pw, ModelBuilder.List list )
+		throws IOException
+	{
+//		printParenLeft( pw );
+		String listCls = page + list.id;
+		String itemCls = listCls + "Item";
+		String listProp = firstCharLower( list.id );
+		printf( pw, listProp );
+		printBracketLeft( pw );
+		for( ListItem item : list.itemList )
+		{
+			printf( pw, itemCls );
+			printParenLeft( pw );
+			for( ListItemParameter param : item.paramList )
+			{
+				String key = firstCharLower( param.id );
+				printf( pw, "%s \"%s\"", key, param.text.trim() );
+				if( param.kind == ModelBuilder.ListItemParameter.Kind.A && param.href != null )
+				{
+					printf( pw, "%s \"%s\"", key + "Href", param.href );
+				}
+			}
+			if( item.text != null )
+			{
+				printf( pw, "text \"%s\"", item.text.trim() );
+				
+			}
+			for( ModelBuilder.List child : list.children )
+			{
+				listData( page, pw, child );
+				break;
+			}
+			printParenRight( pw );
+		}
+		printBracketRight( pw );
+		
+		
+//		printParenRight( pw );
+	}
+	
+	int tabs = 0;
+	void indent( PrintWriter pw )
+		throws IOException
+	{
+		for( int nth = 0; nth < tabs; nth++ )
+		{
+			pw.write( '\t' );
+		}
+	}
+	
+	void print( PrintWriter pw, String str )
+		throws IOException
+	{
+		pw.write( str );
+	}
+	
+	void print( PrintWriter pw, char c )
+		throws IOException
+	{
+		pw.write( c );
+	}
+	
+	void println( PrintWriter pw )
+		throws IOException
+	{
+		pw.write( '\n' );
+	}
+	
+	void println( PrintWriter pw, String str )
+		throws IOException
+	{
+		indent( pw );
+		pw.write( str );
+		println( pw );
+	}
+	
+	void printf( PrintWriter pw, String str, Object... args )
+		throws IOException
+	{
+		indent( pw );
+		pw.printf( str, args );
+		println( pw );
+	}
+	
+	void printParenLeft( PrintWriter pw )
+		throws IOException
+	{
+		indent( pw );
+		pw.write( '(' );
+		pw.write( '\n' );
+		tabs++;
+	}
+
+	void printParenRight( PrintWriter pw )
+		throws IOException
+	{
+		tabs--;
+		indent( pw );
+		pw.write( ')' );
+		pw.write( '\n' );
+	}
+	
+	void printBracketLeft( PrintWriter pw )
+		throws IOException
+	{
+		indent( pw );
+		pw.write( '[' );
+		pw.write( '\n' );
+		tabs++;
+	}
+	
+	void printBracketRight( PrintWriter pw )
+		throws IOException
+	{
+		tabs--;
+		indent( pw );
+		pw.write( ']' );
+		pw.write( '\n' );
+	}
+	
 }

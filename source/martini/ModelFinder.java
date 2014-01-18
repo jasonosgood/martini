@@ -93,7 +93,7 @@ public class
 		if( _stack.match( "**/ul[martini]" ))
 		{
 			recurse = false;
-			list( parent );
+			processUL( parent );
 		}
 		else
 		if( _stack.match( "**/*[martini]" ))
@@ -254,56 +254,79 @@ public class
 		}
 	}
 	
-	public void list( Element list )
+	public void processUL( Element list )
 	{
 		String listID = getMartiniID( list );
-		_builder.addList( listID );
+		_builder.pushList( listID );
 		for( Element item : list.find( "li" ))
 		{
 			_builder.addListItem();
 			
-			for( Element div : item.find( "**/div[martini]" ))
-			{
-				String id = getMartiniID( div );
-				// TODO Print error message
-				if( id == null ) continue;
-				String text = div.getText();
-			
-				_builder.addListItemParameter( ModelBuilder.ListItemParameter.Kind.DIV, id );
-				_builder.itemParam.text = text;
-			}
-			
-			for( Element span : item.find( "**/span[martini]" ))
-			{
-				String id = getMartiniID( span );
-				// TODO Print error message
-				if( id == null ) continue;
-				String text = span.getText();
-			
-				_builder.addListItemParameter( ModelBuilder.ListItemParameter.Kind.SPAN, id );
-				_builder.itemParam.text = text;
-			}
-			
-			for( Element a : item.find( "**/a[martini]" ))
-			{
-				String id = getMartiniID( a );
-				// TODO Print error message
-				if( id == null ) continue;
-				String href = a.getAttributeValue( "href" );
-				String text = a.getText( false );
-			
-				_builder.addListItemParameter( ModelBuilder.ListItemParameter.Kind.A, id );
-				_builder.itemParam.text = text;
-				_builder.itemParam.href = href;
-			}
-			
+			processLI( item );
+				
 			if( _builder.item.paramList.size() == 0 )
 			{
 				_builder.item.text = item.getText();
 			}
 		}
+		_builder.popList( listID );
 		
 		removeAllButFirst( list, "li" );
+	}
+
+	public void processLI( Element parent )
+	{
+		for( Content content : parent )
+		{
+			if( content instanceof Element )
+			{
+				Element child = (Element) content;
+				if( child.hasAttribute( "martini" ))
+				{
+					String id = getMartiniID( child );
+					switch( child.name().toLowerCase() )
+					{
+						case "ul":
+							processUL( child );
+							break;
+							
+						case "div":
+						{
+							String text = child.getText();
+							_builder.addListItemParameter( ModelBuilder.ListItemParameter.Kind.DIV, id );
+							_builder.itemParam.text = text;
+							
+							break;
+						}
+						case "span":
+						{
+							String text = child.getText();
+							_builder.addListItemParameter( ModelBuilder.ListItemParameter.Kind.SPAN, id );
+							_builder.itemParam.text = text;
+							
+							break;
+						}
+						case "a":
+						{
+							String href = child.getAttributeValue( "href" );
+							String text = child.getText( false );
+						
+							_builder.addListItemParameter( ModelBuilder.ListItemParameter.Kind.A, id );
+							_builder.itemParam.text = text;
+							_builder.itemParam.href = href;
+
+							processLI( child );
+							
+							break;
+						}
+						
+						default:
+							processLI( child );
+							break;
+					}
+				}
+			}
+		}
 	}
 	
 	public static String getMartiniID( Element element )

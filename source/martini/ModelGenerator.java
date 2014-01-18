@@ -226,14 +226,20 @@ public class ModelGenerator
 			writeFormModel( targetDir, form, pkg, page );
 		}
 		
-		for( ModelBuilder.List list : builder.listList )
-		{
-			writeItemModel( targetDir, list, pkg, page );
-		}
+		writeListModels( targetDir, pkg, page, builder.rootList );
 		
 		for( ModelBuilder.Article article : builder.articleList )
 		{
 			writeArticleModel( targetDir, article, pkg, page );
+		}
+	}
+	
+	public void writeListModels( File targetDir, String pkg, String page, ModelBuilder.List parent )
+		throws IOException
+	{
+		for( ModelBuilder.List child : parent.children )
+		{
+			writeItemModel( targetDir, pkg, page, child );
 		}
 	}
 
@@ -243,94 +249,94 @@ public class ModelGenerator
 		return martini.model.Table.class.getPackage().getName();
 	}
 	
-	public void writePageModel( File targetDir, ModelBuilder builder, String pkg, String page )
-		throws IOException
-	{
-		String cls = page + "Model";
-		
-		File target = new File( targetDir, cls + ".java" );
-		PrintWriter pw = new PrintWriter( target );
-		if( pkg != null )
-		{
-			pw.printf( "package %s;\n", pkg );
-		}
-		
-		pw.println();
-		pw.printf( "import %s.*;\n", getModelImport() );
-		pw.printf( "import java.util.List;\n" );
-		pw.printf( "import java.util.ArrayList;\n" );
-		pw.println();
-		
-		pw.printf( "public class\n" );
-		pw.printf( "	%s\n", cls ); 
-		pw.printf( "extends \n" );
-		pw.printf( "	Model\n" ); 
-		pw.printf( "{\n" );
-		
-		for( ModelBuilder.Table table : builder.tableList )
-		{
-			String id = table.id + "Table";
-			
-			String clazz = page + id;
-			String accessor = id;
-			String variable = firstCharLower( id );
-			pw.printf( "	private %s _%s = null;\n", clazz, variable );
-			pw.printf( "	public %s get%s() { return _%s; }\n", clazz, accessor, variable );
-			pw.printf( "	public void set%s( %s %s ) { \n", accessor, clazz, variable );
-			pw.printf( "		_%s = %s;\n", variable, variable );
-			pw.printf( "		_%s.setModel( this );\n", variable );
-			pw.printf( "	}\n" );
-			pw.println();
-		}
-		
-		for( ModelBuilder.Form form : builder.formList )
-		{
-			String id = form.id + "Form";
-			
-			String clazz = page + id;
-			String accessor = id;
-			String variable = firstCharLower( id );
-			pw.printf( "	private %s _%s = null;\n", clazz, variable );
-			pw.printf( "	public %s get%s() { return _%s; }\n", clazz, accessor, variable );
-			pw.printf( "	public void set%s( %s %s ) { \n", accessor, clazz, variable );
-			pw.printf( "		_%s = %s;\n", variable, variable );
-			pw.printf( "		_%s.setModel( this );\n", variable );
-			pw.printf( "	}\n" );
-			pw.println();
-		}
-		
-		for( ModelBuilder.List list : builder.listList )
-		{
-			String id = list.id;
-			
-			String clazz = "List<" + page + id + "Item>";
-			String method = id;
-			String variable = firstCharLower( id );
-			pw.printf( "	private %s _%s = new Array%s();\n", clazz, variable, clazz );
-			pw.printf( "	public %s get%s() { return _%s; }\n", clazz, method, variable );
-			pw.printf( "	public void set%s( %s %s ) { _%s = %s; }\n", method, clazz, variable, variable, variable );
-			pw.println();
-		}
-		
-		for( ModelBuilder.Article article : builder.articleList )
-		{
-			String id = article.id + "Article";
-			
-			String clazz = page + id;
-			String accessor = id;
-			String variable = firstCharLower( id );
-			pw.printf( "	private %s _%s = null;\n", clazz, variable );
-			pw.printf( "	public %s get%s() { return _%s; }\n", clazz, accessor, variable );
-			pw.printf( "	public void set%s( %s %s ) { \n", accessor, clazz, variable );
-			pw.printf( "		_%s = %s;\n", variable, variable );
-			pw.printf( "		_%s.setModel( this );\n", variable );
-			pw.printf( "	}\n" );
-			pw.println();
-		}
-		
-		pw.printf( "}\n" );
-		pw.close();
-	}
+//	public void writePageModel( File targetDir, ModelBuilder builder, String pkg, String page )
+//		throws IOException
+//	{
+//		String cls = page + "Model";
+//		
+//		File target = new File( targetDir, cls + ".java" );
+//		PrintWriter pw = new PrintWriter( target );
+//		if( pkg != null )
+//		{
+//			pw.printf( "package %s;\n", pkg );
+//		}
+//		
+//		pw.println();
+//		pw.printf( "import %s.*;\n", getModelImport() );
+//		pw.printf( "import java.util.List;\n" );
+//		pw.printf( "import java.util.ArrayList;\n" );
+//		pw.println();
+//		
+//		pw.printf( "public class\n" );
+//		pw.printf( "	%s\n", cls ); 
+//		pw.printf( "extends \n" );
+//		pw.printf( "	Model\n" ); 
+//		pw.printf( "{\n" );
+//		
+//		for( ModelBuilder.Table table : builder.tableList )
+//		{
+//			String id = table.id + "Table";
+//			
+//			String clazz = page + id;
+//			String accessor = id;
+//			String variable = firstCharLower( id );
+//			pw.printf( "	private %s _%s = null;\n", clazz, variable );
+//			pw.printf( "	public %s get%s() { return _%s; }\n", clazz, accessor, variable );
+//			pw.printf( "	public void set%s( %s %s ) { \n", accessor, clazz, variable );
+//			pw.printf( "		_%s = %s;\n", variable, variable );
+//			pw.printf( "		_%s.setModel( this );\n", variable );
+//			pw.printf( "	}\n" );
+//			pw.println();
+//		}
+//		
+//		for( ModelBuilder.Form form : builder.formList )
+//		{
+//			String id = form.id + "Form";
+//			
+//			String clazz = page + id;
+//			String accessor = id;
+//			String variable = firstCharLower( id );
+//			pw.printf( "	private %s _%s = null;\n", clazz, variable );
+//			pw.printf( "	public %s get%s() { return _%s; }\n", clazz, accessor, variable );
+//			pw.printf( "	public void set%s( %s %s ) { \n", accessor, clazz, variable );
+//			pw.printf( "		_%s = %s;\n", variable, variable );
+//			pw.printf( "		_%s.setModel( this );\n", variable );
+//			pw.printf( "	}\n" );
+//			pw.println();
+//		}
+//		
+//		for( ModelBuilder.List list : builder.listList )
+//		{
+//			String id = list.id;
+//			
+//			String clazz = "List<" + page + id + "Item>";
+//			String method = id;
+//			String variable = firstCharLower( id );
+//			pw.printf( "	private %s _%s = new Array%s();\n", clazz, variable, clazz );
+//			pw.printf( "	public %s get%s() { return _%s; }\n", clazz, method, variable );
+//			pw.printf( "	public void set%s( %s %s ) { _%s = %s; }\n", method, clazz, variable, variable, variable );
+//			pw.println();
+//		}
+//		
+//		for( ModelBuilder.Article article : builder.articleList )
+//		{
+//			String id = article.id + "Article";
+//			
+//			String clazz = page + id;
+//			String accessor = id;
+//			String variable = firstCharLower( id );
+//			pw.printf( "	private %s _%s = null;\n", clazz, variable );
+//			pw.printf( "	public %s get%s() { return _%s; }\n", clazz, accessor, variable );
+//			pw.printf( "	public void set%s( %s %s ) { \n", accessor, clazz, variable );
+//			pw.printf( "		_%s = %s;\n", variable, variable );
+//			pw.printf( "		_%s.setModel( this );\n", variable );
+//			pw.printf( "	}\n" );
+//			pw.println();
+//		}
+//		
+//		pw.printf( "}\n" );
+//		pw.close();
+//	}
 
 	public void writeTableModel( File targetDir, ModelBuilder.Table table, String pkg, String page )
 		throws IOException
@@ -477,14 +483,13 @@ public class ModelGenerator
 		pw.close();
 	}
 
-	public void writeItemModel( File targetDir, ModelBuilder.List list, String pkg, String page )
+	public void writeItemModel( File targetDir, String pkg, String page, ModelBuilder.List parent )
 		throws IOException
 	{
-		if( list.itemList.size() == 0 ) return;
-		ModelBuilder.ListItem item = list.itemList.get( 0 );
-		String klazz = page + list.id + "Item";
+		if( parent.itemList.size() == 0 ) return;
+		String klazz = page + parent.id;
 		
-		File target = new File( targetDir, klazz + ".java" );
+		File target = new File( targetDir, klazz + "Item.java" );
 		PrintWriter pw = new PrintWriter( target );
 		if( pkg != null )
 		{
@@ -493,14 +498,17 @@ public class ModelGenerator
 		
 		pw.println();
 		pw.printf( "import %s.*;\n", getModelImport() );
+		pw.printf( "import java.util.List;\n" );
+		pw.printf( "import java.util.ArrayList;\n" );
 		pw.println();
 		
 		pw.printf( "public class \n" );
-		pw.printf( "	%s\n", klazz ); 
+		pw.printf( "	%sItem\n", klazz ); 
 		pw.printf( "extends \n" );
 		pw.printf( "	ListItem\n" ); 
 		pw.printf( "{\n" );
 		
+		ModelBuilder.ListItem item = parent.itemList.get( 0 );
 		for( ModelBuilder.ListItemParameter param : item.paramList )
 		{
 			writeAccessor( pw, param.id );
@@ -511,8 +519,34 @@ public class ModelGenerator
 				writeAccessor( pw, param.id + "Href" );
 			}
 		}
+		
+		for( ModelBuilder.List child : parent.children )
+		{
+			String id = child.id;
+			
+			String clazz = "List<" + page + id + "Item>";
+			String method = id;
+			String variable = firstCharLower( id );
+			pw.printf( "	private %s _%s = new Array%s();\n", clazz, variable, clazz );
+			pw.printf( "	public %s get%s() { return _%s; }\n", clazz, method, variable );
+			pw.printf( "	public void set%s( %s %s ) { _%s = %s; }\n", method, clazz, variable, variable, variable );
+			pw.println();
+			
+			
+			// just first instance
+			break;
+		}
+		
+
 		pw.printf( "}\n" );
 		pw.close();
+		
+		for( ModelBuilder.List child : parent.children )
+		{
+			writeItemModel( targetDir, pkg, page, child );
+			break;
+		}
+
 	}
 	
 	public void writeArticleModel( File targetDir, ModelBuilder.Article article, String pkg, String page )

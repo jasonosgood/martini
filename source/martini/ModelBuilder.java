@@ -3,6 +3,7 @@ package martini;
 import static martini.util.Util.firstCharUpper;
 
 import java.util.ArrayList;
+import java.util.Stack;
 
 import lox.Element;
 
@@ -215,8 +216,8 @@ public class ModelBuilder
 	static class List
 	{
 		String id;
+		ArrayList<List> children = new ArrayList<List>();
 		ArrayList<ListItem> itemList = new ArrayList<ListItem>();
-		
 	}
 	
 	static class ListItem
@@ -224,7 +225,6 @@ public class ModelBuilder
 		// Only used when there's no other subelements representing parameters, eg <ul whiz:id="ugh"><li>Text</li></ul>
 		String text = null;
 		ArrayList<ListItemParameter> paramList = new ArrayList<ListItemParameter>();
-		
 	}
 	
 	static class ListItemParameter
@@ -236,22 +236,46 @@ public class ModelBuilder
 		String href;
 	}
 	
-	ArrayList<List> listList = new ArrayList<List>();
-	List list;
+//	ArrayList<List> listList = new ArrayList<List>();
+//	List list;
+	List rootList = new List();
+	Stack<List> listStack = new Stack<List>();
 	ListItem item;
 	ListItemParameter itemParam;
 	
-    public void addList( String id )
+	public ModelBuilder()
+	{
+		listStack.push( rootList );
+	}
+	
+    public void pushList( String id )
     {
-    	list = new List();
-    	list.id = firstCharUpper( id.trim() );
-    	listList.add( list );
+    	List child = new List();
+    	child.id = firstCharUpper( id.trim() );
+    	
+    	List parent = listStack.peek();
+    	parent.children.add( child );
+    	listStack.push( child );
     }
+    
+    public void popList( String id )
+    	throws IllegalArgumentException
+    {
+    	List parent = listStack.pop();
+    	String parentID = parent.id;
+		if( !parentID.equalsIgnoreCase( id ))
+    	{
+    		String msg = String.format( "stack's list ids don't match, expected %s, actual %s", id, parentID );
+			throw new IllegalArgumentException( msg );
+    	}
+    }
+    
     
     public void addListItem()
     {
     	item = new ListItem();
-    	list.itemList.add( item );
+    	List parent = listStack.peek();
+    	parent.itemList.add( item );
     }
     
     public void addListItemParameter( ListItemParameter.Kind kind, String id )

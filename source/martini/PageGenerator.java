@@ -177,16 +177,16 @@ public class PageGenerator
 			println();
 		}
 		
-		for( ModelBuilder.List list : _builder.listList )
+		for( ModelBuilder.List list : _builder.rootList.children )
 		{
 			String id = list.id;
 			
 			String clazz = "List<" + _className + id + "Item>";
 			String method = id;
 			String variable = firstCharLower( id );
-			printf( "	private %s _%s = new Array%s();", clazz, variable, clazz );
-			printf( "	public %s get%s() { return _%s; }", clazz, method, variable );
-			printf( "	public void set%s( %s %s ) { _%s = %s; }", method, clazz, variable, variable, variable );
+			printf( "private %s _%s = new Array%s();", clazz, variable, clazz );
+			printf( "public %s get%s() { return _%s; }", clazz, method, variable );
+			printf( "public void set%s( %s %s ) { _%s = %s; }", method, clazz, variable, variable, variable );
 			println();
 		}
 		
@@ -350,6 +350,8 @@ public class PageGenerator
 	
 	Stack _stack = new Stack();
 	
+	int treeDepth = -1;
+	
 	public void element( Element element )
 		throws IOException
 	{
@@ -407,8 +409,19 @@ public class PageGenerator
 		if( _stack.match( "**/ul[martini]" ))
 		{
 			String listID = firstCharUpper( getMartiniID( element ));
-			String chain = _className + listID + "Item item : get" + listID + "()";
-			println( "for( " + chain + " )" );
+			treeDepth++;
+			if( treeDepth == 0 )
+			{
+				String pattern = "for( %s%sItem item%d : get%s()  )";
+				String meh = String.format( pattern, _className, listID, treeDepth, listID );
+				println( meh );
+			}
+			else
+			{
+				String pattern = "for( %s%sItem item%d : item%d.get%s()  )";
+				String meh = String.format( pattern, _className, listID, treeDepth, treeDepth - 1, listID );
+				println( meh );
+			}
 			println( "{" );
 			tabs++;
 			current = Kind.UL;
@@ -492,8 +505,10 @@ public class PageGenerator
 		
 		switch( current )
 		{
-			case TBODY:
 			case UL:
+				treeDepth--;
+				// fallthru
+			case TBODY:
 			case FORM:
 				tabs--;
 				println( "}");
@@ -574,7 +589,7 @@ public class PageGenerator
 		if( _stack.match( "**/ul[martini]/li/**/a[martini]" ) && "href".equalsIgnoreCase( key ))
 		{
 			String fieldID = firstCharUpper( getMartiniID( _stack.peek( 0 ) ));
-			chain = "item.get" + fieldID + "Href()";
+			chain = "item" + treeDepth + ".get" + fieldID + "Href()";
 		}
 		else
 		if( _stack.match( "**/a[martini]" ) && "href".equalsIgnoreCase( key ))
@@ -624,7 +639,7 @@ public class PageGenerator
 		)
 		{
 			String fieldID = firstCharUpper( getMartiniID( _stack.peek( 0 ) ) );
-			chain = "item.get" + fieldID + "()";
+			chain = "item" + treeDepth + ".get" + fieldID + "()";
 		}
 		else
 		if( _stack.match( "**/ul[martini]/li" ))
@@ -633,7 +648,7 @@ public class PageGenerator
 			List<Element> children = li.find( "*" );
 			if( children.isEmpty() )
 			{
-				chain = "item.getText()";
+				chain = "item" + treeDepth + ".getText()";
 			}
 		}
 		else
