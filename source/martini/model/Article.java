@@ -8,19 +8,19 @@ import martini.HTMLBuilder;
 public class 
 	Article<P extends Page>
 {
-	private P _page = null;
-	
-	public void setPage( P page )
-	{
-		_page = page;
-	}
-	
-	public P getPage()
-	{
-		return _page;
-	}
+//	private P _page = null;
+//	
+//	public void setPage( P page )
+//	{
+//		_page = page;
+//	}
+//	
+//	public P getPage()
+//	{
+//		return _page;
+//	}
 
-	public void write( HTMLBuilder builder )
+	public void write( P page, HTMLBuilder builder )
 		throws IOException
 	{
 		builder.element( "div" );
