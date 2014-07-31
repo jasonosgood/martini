@@ -1,7 +1,11 @@
 package martini.model;
 
+import java.util.HashMap;
+
 public class 
 	Option 
+//implements
+//	SelectItem
 {
 	private String _value = null;
 	
@@ -17,7 +21,7 @@ public class
 	
 	public String getValue()
 	{
-		return _value;
+		return hasValue() ? _value : getText();
 	}
 	
 	private String _text = null;
@@ -42,6 +46,18 @@ public class
 	public boolean getSelected()
 	{
 		return _selected;
+	}
+	
+	private HashMap<String,Object> _attributes = new HashMap<>();
+	
+	public void setAttributes( HashMap<String,Object> attributes )
+	{
+		_attributes = attributes;
+	}
+	
+	public HashMap<String,Object> getAttributes()
+	{
+		return _attributes;
 	}
 	
 	public String toString()

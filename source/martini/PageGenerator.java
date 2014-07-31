@@ -104,6 +104,11 @@ public class PageGenerator
 			printf( "public String getURI() { return \"%s\"; };", _builder.uri  );
 			println();
 		}
+		else
+		{
+			printf( "// Create file '%s.request.http' to override default Page.getURL() method", _className  );
+			println();
+		}
 		
 		for( String param : _builder.urlParamList )
 		{
@@ -204,7 +209,6 @@ public class PageGenerator
 			printf( "	public %s get%s() { return _%s; }", clazz, accessor, variable );
 			printf( "	public void set%s( %s %s ) {", accessor, clazz, variable );
 			printf( "		_%s = %s;", variable, variable );
-//			printf( "		_%s.setPage( this );", variable );
 			printf( "	}" );
 			println();
 		}
@@ -265,7 +269,7 @@ public class PageGenerator
 					}
 					case "select":
 					{
-						println( "get" + form.id + "Form().get" + method + "().setValue( getRequestParameter( params, \"" + form.name + "\" )); " );
+						println( "get" + form.id + "Form().get" + method + "().setValue( getRequestParameters( params, \"" + form.name + "\" )); " );
 						break;
 					}
 					default:
@@ -388,10 +392,9 @@ public class PageGenerator
 			tabs++;
 			println( "Article article = get" + articleID + "Article();" );
 			println( "HTMLBuilder builder = new HTMLBuilder( response.getWriter() );" );
-			println( "article.write( builder );" );
+			println( "article.write( this, builder );" );
 			tabs--;
 			println( "}" );
-//			println( "pop();" );
 			_stack.pop();
 			println( "pop();" );
 			
@@ -437,25 +440,27 @@ public class PageGenerator
 			String name = element.getAttributeValue( "name" );
 			addFormProperty( formID, name, "select" );
 			name = firstCharUpper( name );
-			String chain = "Option option : get" + formID + "Form().get" + name + "()";
-			println( "for( " + chain + " )" );
-			println( "{" );
-			tabs++;
-			
-			println( "element( \"option\" );" );
-			println( "String value = option.getValue();" );
-			println( "if( hasText( value ))" );
-			println( "{" );
-			println( "\tattribute( \"value\", value );" );
-			println( "}" );
-			println( "if( option.getSelected() )" );
-			println( "{" );
-			println( "\tattribute( \"selected\", \"selected\" );" );
-			println( "}" );
-			println( "text( option.getText() );" );
-			println( "pop();" );
+			String chain = "render( get" + formID + "Form().get" + name + "() );";
+			println( chain );
+//			String chain = "Option option : get" + formID + "Form().get" + name + "()";
+//			println( "for( " + chain + " )" );
+//			println( "{" );
+//			tabs++;
+//			
+//			println( "element( \"option\" );" );
+//			println( "String value = option.getValue();" );
+//			println( "if( hasText( value ))" );
+//			println( "{" );
+//			println( "\tattribute( \"value\", value );" );
+//			println( "}" );
+//			println( "if( option.getSelected() )" );
+//			println( "{" );
+//			println( "\tattribute( \"selected\", \"selected\" );" );
+//			println( "}" );
+//			println( "text( option.getText() );" );
+//			println( "pop();" );
 
-			current = Kind.FORM;
+//			current = Kind.FORM;
 		}
 		else
 		if( _stack.match( "**/form[martini]/**/input[name]" ))
@@ -575,19 +580,19 @@ public class PageGenerator
 				}
 			}
 		}
-		else
-		if( _stack.match( "**/form[martini]/**/select[name]/option" ))
-		{
-			if( "value".equalsIgnoreCase( key ))
-			{
-				chain = "option.getValue()";
-			}
-			else
-			if( "selected".equalsIgnoreCase( key ))
-			{
-				chain = "option.getSelected()";
-			}
-		}
+//		else
+//		if( _stack.match( "**/form[martini]/**/select[name]/option" ))
+//		{
+//			if( "value".equalsIgnoreCase( key ))
+//			{
+//				chain = "option.getValue()";
+//			}
+//			else
+//			if( "selected".equalsIgnoreCase( key ))
+//			{
+//				chain = "option.getSelected()";
+//			}
+//		}
 		else
 		if( _stack.match( "**/ul[martini]/li/**/a[martini]" ) && "href".equalsIgnoreCase( key ))
 		{
@@ -654,11 +659,11 @@ public class PageGenerator
 				chain = "item" + treeDepth + ".getText()";
 			}
 		}
-		else
-		if( _stack.match( "**/form[martini]/**/select[name]/option" ))
-		{
-			chain = "option.getText()";
-		}
+//		else
+//		if( _stack.match( "**/form[martini]/**/select[name]/option" ))
+//		{
+//			chain = "option.getText()";
+//		}
 		
 		else
 		if( _stack.match( "**/*[martini]" ))

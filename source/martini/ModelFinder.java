@@ -6,10 +6,12 @@ import static martini.util.Util.firstCharUpper;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.util.HashMap;
 
 import org.ccil.cowan.tagsoup.Parser;
 import org.xml.sax.InputSource;
 
+import lox.Attribute;
 import lox.Content;
 import lox.Document;
 import lox.Element;
@@ -216,15 +218,26 @@ public class
 					else
 					{
 						_builder.addSelect( name );
-						for( Element option : child.find( "option" ))
-						{
-							String text = option.getText();
-							String value = option.getAttributeValue( "value" );
-							boolean selected = option.hasAttribute( "selected" );
-							_builder.addOption( value, text, selected );
-						}
 						
+						for( Element grandchild : child.find( "optgroup|option" ))
+						{
+							if( "option".equalsIgnoreCase( grandchild.name() )) 
+							{
+								addOption( grandchild );
+							}
+							else if( "optgroup".equalsIgnoreCase( grandchild.name() )) 
+							{
+								String label = grandchild.getAttributeValue( "label" );
+								_builder.pushOptGroup( label );
+								for( Element option : grandchild.find( "option" ))
+								{
+									addOption( option );
+								}
+								_builder.popOptGroup();
+							}
+						}
 						removeAllButFirst( child, "option" );
+						removeAllButFirst( child, "optgroup" );
 					}
 					continue;
 				}
@@ -252,6 +265,34 @@ public class
 				form( child );
 			}
 		}
+	}
+
+	// TODO: Just treat all key/values as attributes, code generate subclasses of Option
+	public void addOption( Element option )
+	{
+		String text = option.getText();
+		String value = null;
+		boolean selected = false;
+		HashMap<String,Object> map = new HashMap<>();
+		for( Attribute attrib : option.attributes() )
+		{
+			switch( attrib.key() )
+			{
+				case "value": 
+					value = attrib.valueAsString(); 
+					break;
+					
+				case "selected": 
+					selected = true; 
+					break;
+					
+				default: 
+					map.put( attrib.key(), attrib.value() );
+					
+			}
+		}
+		
+		_builder.addOption( value, text, selected, map );
 	}
 	
 	public void processUL( Element list )
@@ -350,7 +391,10 @@ public class
 	void removeAllButFirst( Element parent, String expr )
 	{
 		Element first = parent.findFirst( expr );
-		parent.clear();
-		parent.add( first );
+		if( !first.isNull() )
+		{
+			parent.clear();
+			parent.add( first );
+		}
 	}
 }

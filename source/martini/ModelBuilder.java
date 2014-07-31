@@ -3,8 +3,10 @@ package martini;
 import static martini.util.Util.firstCharUpper;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Stack;
 
+import aron.ARONWriter;
 import lox.Element;
 
 public class ModelBuilder 
@@ -123,17 +125,35 @@ public class ModelBuilder
 		boolean value;
 	}
 	
-	static class Select
+	static interface OptionChild {}
+	
+	static class Option implements OptionChild
 	{
-		String name;
-		ArrayList<Option> optionList = new ArrayList<Option>();
+		public String value;
+		public String text;
+		public boolean selected;
+		public HashMap<String,Object> attribs = new HashMap<>();
+		public String toString() {
+			return "option value: " + value + " selected: " + selected + " text: " + text;
+		}
 	}
 	
-	static class Option
+	static class OptGroup implements OptionChild
 	{
-		String value;
-		String text;
-		boolean selected;
+		public String label;
+		public ArrayList<OptionChild> children = new ArrayList<OptionChild>();
+		public String toString() {
+			return "optgroup label: " + label + " " + children.toString();
+		}
+	}
+	
+	static class Select extends OptGroup
+	{
+		public String name;
+		public String toString() {
+//			return "select name: " + name + " " + children.toString();
+			return ARONWriter.toString( this );
+		}
 	}
 	
 	static class Textarea
@@ -147,6 +167,7 @@ public class ModelBuilder
 	Form form;
 	Input input;
 	Select select;
+	Stack<OptGroup> optGroupStack = new Stack<OptGroup>();
 	Option option;
 	Textarea textarea;
 	
@@ -194,15 +215,35 @@ public class ModelBuilder
 		select = new Select();
 		select.name = firstCharUpper( name.trim() );
 		form.selectList.add( select );
+		optGroupStack.clear();
+		optGroupStack.push( select );
 	}
 	
-	public void addOption( String value, String text, boolean selected )
+	public void pushOptGroup( String label )
+	{
+		OptGroup optGroup = new OptGroup();
+		optGroup.label = label.trim();
+		
+		OptGroup top = optGroupStack.peek();
+		top.children.add( optGroup );
+		optGroupStack.push( optGroup );
+	}
+	
+	public void popOptGroup()
+	{
+		optGroupStack.pop();
+	}
+	
+	public void addOption( String value, String text, boolean selected, HashMap<String,Object> attribs )
 	{
 		option = new Option();
 		option.value = value;
 		option.text = text;
 		option.selected = selected;
-		select.optionList.add( option );
+		option.attribs = attribs;
+		OptGroup top = optGroupStack.peek();
+		top.children.add( option );
+//		select.optionList.add( option );
 	}
 
 	public void addTextarea( String name, String value )

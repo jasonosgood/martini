@@ -9,6 +9,7 @@ import static martini.util.Util.escape;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Map.Entry;
 
 import martini.ModelBuilder.BooleanInput;
 import martini.ModelBuilder.Cell;
@@ -57,6 +58,7 @@ public class
 			if( !form.selectList.isEmpty() )
 			{
 				printf( pw, "import martini.model.Select" );
+				printf( pw, "import martini.model.OptGroup" );
 				printf( pw, "import martini.model.Option" );
 			}
 		}
@@ -149,28 +151,93 @@ public class
 			for( ModelBuilder.Select select : form.selectList )
 			{
 				String selectProp = firstCharLower( select.name );
-				printf( pw, selectProp );
+				printf( pw, "%s Select", selectProp );
+				printParenLeft( pw );
+				printf( pw, "children" );
 				printBracketLeft( pw );
-				for( ModelBuilder.Option option : select.optionList )
+				for( ModelBuilder.OptionChild child : select.children )
 				{
-					printf( pw, "Option" );
-					printParenLeft( pw );
-					if( option.value != null )
+					if( child instanceof ModelBuilder.Option )
 					{
-						String value = firstCharLower( option.value );
-						printf( pw, "value \"%s\"", value );
+						ModelBuilder.Option option = (ModelBuilder.Option) child;
+						printf( pw, "Option" );
+						printParenLeft( pw );
+						if( option.value != null )
+						{
+	//						String value = firstCharLower( option.value );
+							String value = option.value;
+							printf( pw, "value \"%s\"", value );
+						}
+						String text = option.text;
+						if( text == null ) text = "";
+						printf( pw, "text \"%s\"", text.trim() );
+						
+						if( option.selected )
+						{
+							printf( pw, "selected true" );
+						}
+						
+						if( !option.attribs.isEmpty() )
+						{
+							printf( pw, "attributes" );
+							printSquiggleLeft( pw );
+							for( Entry<String, Object> entry : option.attribs.entrySet() )
+							{
+								printf( pw, "\"%s\" \"%s\"", entry.getKey(), entry.getValue() );
+							}
+							printSquiggleRight( pw );
+						}
+						printParenRight( pw );
 					}
-					String text = option.text;
-					if( text == null ) text = "";
-					printf( pw, "text \"%s\"", text.trim() );
-					
-					if( option.selected )
+					else if( child instanceof ModelBuilder.OptGroup )
 					{
-						printf( pw, "selected true" );
+						ModelBuilder.OptGroup optgroup = (ModelBuilder.OptGroup) child;
+						printf( pw, "OptGroup" );
+						printParenLeft( pw );
+						printf( pw, "label \"%s\"", optgroup.label );
+						printf( pw, "children" );
+						printBracketLeft( pw );
+						for( ModelBuilder.OptionChild grandchild : optgroup.children )
+						{
+							ModelBuilder.Option option = (ModelBuilder.Option) grandchild;
+							printf( pw, "Option" );
+							printParenLeft( pw );
+							if( option.value != null )
+							{
+		//						String value = firstCharLower( option.value );
+								String value = option.value;
+								printf( pw, "value \"%s\"", value );
+							}
+							String text = option.text;
+							if( text == null ) text = "";
+							printf( pw, "text \"%s\"", text.trim() );
+							
+							if( option.selected )
+							{
+								printf( pw, "selected true" );
+							}
+							
+							if( !option.attribs.isEmpty() )
+							{
+								printf( pw, "attributes" );
+								printSquiggleLeft( pw );
+								for( Entry<String, Object> entry : option.attribs.entrySet() )
+								{
+									printf( pw, "\"%s\" \"%s\"", entry.getKey(), entry.getValue() );
+								}
+								printSquiggleRight( pw );
+							}
+							
+							printParenRight( pw );
+						}
+						printBracketRight( pw );
+
+						printParenRight( pw );
 					}
-					printParenRight( pw );
+
 				}
 				printBracketRight( pw );
+				printParenRight( pw );
 			}
 	
 			for( Textarea textarea : form.textareaList )
@@ -325,6 +392,24 @@ public class
 		tabs--;
 		indent( pw );
 		pw.write( ']' );
+		pw.write( '\n' );
+	}
+	
+	void printSquiggleLeft( PrintWriter pw )
+		throws IOException
+	{
+		indent( pw );
+		pw.write( '{' );
+		pw.write( '\n' );
+		tabs++;
+			}
+	
+	void printSquiggleRight( PrintWriter pw )
+		throws IOException
+	{
+		tabs--;
+		indent( pw );
+		pw.write( '}' );
 		pw.write( '\n' );
 	}
 	

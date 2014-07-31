@@ -1,62 +1,135 @@
 package martini.model;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.PrintStream;
-import java.io.StringWriter;
 import java.util.ArrayList;
 
 import aron.ARONWriter;
 
 public class 
 	Select 
-extends 
-	ArrayList<Option> 
 {
 	private static final long serialVersionUID = 1L;
-
-	// TODO: Fix aron's reflection so this helper method isn't needed
-	public void addOption( Option option )
+	
+	private String _name;
+	
+	public void setName( String name )
 	{
-		add( option );
+		_name = name;
 	}
 	
-	public void setValue( String value ) 
-	{
-		if( value == null || value.length() == 0 ) return;
-		for( Option option : this )
-		{
-			String temp = null;
-			if( option.hasValue() )
-			{
-				temp = option.getValue();
-			}
-			else
-			{
-				temp = option.getText();
-			}
-				
-			boolean selected = value.equals( temp );
-			
-			option.setSelected( selected );
-		}
-	}
-	
-	public String getValue() 
-	{
-		for( Option option : this )
-		{
-			if( option.getSelected() )
-			{
-				return option.getValue();
-			}
-		}
-		return null;
-	}
+	public String getName() { return _name; }
 	
 	public String toString()
 	{
 		return ARONWriter.toString( this );
 	}
+
+	protected ArrayList _children = new ArrayList();
+	
+	public void setChildren( ArrayList children )
+	{
+		_children = children;
+	}
+
+	public ArrayList getChildren()
+	{
+		return _children;
+	}
+	
+	public Option getOption( String value )
+	{
+		if( value == null )
+		{
+			throw new NullPointerException( "value" );
+		}
+		
+		for( Object child : _children )
+		{
+			if( child instanceof OptGroup )
+			{
+				for( Option grandchild : ((OptGroup) child).getChildren() )
+				{
+					Option option = (Option) grandchild;
+					if( value.equals( option.getValue() ))
+					{
+						return option;
+					}
+				}
+			}
+			else
+			{
+				Option option = (Option) child;
+				if( value.equals( option.getValue() ))
+				{
+					return option;
+				}
+			}
+		}
+		
+		String msg = String.format( "Option '%s' not found", value );
+		throw new IllegalArgumentException( msg );
+	}
+
+	public void setValue( String[] values )
+	{
+		if( values == null ) return;
+		for( String value : values )
+		{
+			setValue( value );
+		}		
+	}
+	
+	public void setValue( String value )
+	{
+		if( value == null )
+		{
+			throw new NullPointerException( "value" );
+		}
+		
+		for( Object child : _children )
+		{
+			if( child instanceof OptGroup )
+			{
+				for( Option grandchild : ((OptGroup) child).getChildren() )
+				{
+					Option option = (Option) grandchild;
+					if( value.equals( option.getValue() ))
+					{
+						option.setSelected( true );
+					}
+				}
+			}
+			else
+			{
+				Option option = (Option) child;
+				if( value.equals( option.getValue() ))
+				{
+					option.setSelected( true );
+				}
+			}
+		}
+		
+//		String msg = String.format( "Option '%s' not found", value );
+//		throw new IllegalArgumentException( msg );
+	}
+
+	public String getValue() 
+	{
+		for( Object child : _children )
+		{
+			if( child instanceof OptGroup )
+			{
+				for( Option grandchild : ((OptGroup) child).getChildren() )
+				{
+					if( grandchild.getSelected() ) { return grandchild.getValue(); }
+				}
+			}
+			else
+			{
+				Option option = (Option) child;
+				if( option.getSelected() ) { return option.getValue(); }
+			}
+		}
+		return null;
+	}
+	
 }

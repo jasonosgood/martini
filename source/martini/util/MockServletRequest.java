@@ -6,6 +6,7 @@ import java.io.UnsupportedEncodingException;
 import java.security.Principal;
 import java.util.Collection;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
@@ -29,14 +30,17 @@ public class
 implements 
 	HttpServletRequest 
 {
-
-	/**
-	 * @param args
-	 */
-	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-
+	public MockServletRequest()
+	{
+		_method = "GET";
 	}
+//	/**
+//	 * @param args
+//	 */
+//	public static void main(String[] args) {
+//		// TODO Auto-generated method stub
+//
+//	}
 
 	@Override
 	public AsyncContext getAsyncContext() {
@@ -124,8 +128,7 @@ implements
 
 	@Override
 	public Map<String, String[]> getParameterMap() {
-		// TODO Auto-generated method stub
-		return null;
+		return new HashMap<String, String[]>();
 	}
 
 	@Override
@@ -311,10 +314,10 @@ implements
 		return 0;
 	}
 
+	String _method = null;
 	@Override
 	public String getMethod() {
-		// TODO Auto-generated method stub
-		return null;
+		return _method;
 	}
 
 	@Override

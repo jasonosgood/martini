@@ -1,10 +1,13 @@
 package martini.model;
 
+import static martini.util.Util.hasText;
+
 import java.io.IOException;
 import java.io.Reader;
 import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -35,12 +38,20 @@ extends
 	
 	public String getRequestParameter( Map<String,String[]> map, String key )
 	{
-		String result = "";
 		if( map.containsKey( key ))
 		{
-			result = map.get( key )[0];
+			return map.get( key )[0];
 		}
-		return result;
+		return "";
+	}
+
+	public String[] getRequestParameters( Map<String,String[]> map, String key )
+	{
+		if( map.containsKey( key ))
+		{
+			return map.get( key );
+		}
+		return null;
 	}
 
 	public boolean hasRequestParameter( Map<String,String[]> map, String key )
@@ -144,6 +155,65 @@ extends
 	}
 
 	public abstract void render( HttpServletResponse response ) throws ServletException, IOException;
+	
+	public void render( Select select )
+		throws ServletException, IOException
+	{
+		for( Object child : select.getChildren() )
+		{
+			if( child instanceof Option ) 
+			{
+				Option option = (Option) child;
+				element( "option" );
+				String value = option.getValue();
+				if( hasText( value ))
+				{
+					attribute( "value", value );
+				}
+				if( option.getSelected() )
+				{
+					attribute( "selected", "selected" );
+				}
+				for( Entry<String, Object> entry: option.getAttributes().entrySet() )
+				{
+					attribute( entry.getKey(), entry.getValue() );
+				}
+				text( option.getText() );
+				pop();
+			}
+			else if( child instanceof OptGroup )
+			{
+				OptGroup optgroup = (OptGroup) child;
+				element( "optgroup" );
+				if( optgroup.hasLabel() )
+				{
+					attribute( "label", optgroup.getLabel() );
+				}
+				for( Option grandchild : optgroup.getChildren() )
+				{
+					Option option = (Option) grandchild;
+					element( "option" );
+					String value = option.getValue();
+					if( hasText( value ))
+					{
+						attribute( "value", value );
+					}
+					if( option.getSelected() )
+					{
+						attribute( "selected", "selected" );
+					}
+					for( Entry<String, Object> entry: option.getAttributes().entrySet() )
+					{
+						attribute( entry.getKey(), entry.getValue() );
+					}
+					text( option.getText() );
+					pop();
+				}
+				pop();
+			}
+		}
+	
+	}
 
 	/**
 	 *  Generated subclass overrides template method this. Used to transfer URI's 
