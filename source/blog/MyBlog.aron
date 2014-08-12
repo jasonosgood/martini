@@ -1,0 +1,22 @@
+# ARON 0.1
+
+include Blog.aron
+
+import blog.BlogHandler
+import martini.util.DB
+
+bloghandler:BlogHandler 
+(
+	db DB 
+	(
+		driver "org.h2.Driver"
+#		url "jdbc:h2:tcp://localhost:9092/~/git/martini/db/blog"
+#		url "jdbc:h2:tcp://localhost:9092/~/db/blog"
+		url "jdbc:h2:~/db/blog"
+		username "sa"
+		password ""
+	)
+)
+
+
+@page.handler @bloghandler 
